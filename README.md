@@ -10,5 +10,6 @@ This project shows how to program the Challenger RP2040 UWB module with the Ardu
 
 #TODOs
 1. create simple anchor teg system
-2. get 2d/3d oriantation/position
-3. pass the data to bigger µProcessor like (RP 5b) with ros/ros2 to make it part of bigger robotics system
+2. increase the accuracy of UWB distance from cm to mm
+3. get 2d/3d oriantation/position
+4. pass the data to bigger µProcessor like (RP 5b) with ros/ros2 to make it part of bigger robotics system
