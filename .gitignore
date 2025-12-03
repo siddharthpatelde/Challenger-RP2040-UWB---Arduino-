@@ -101,6 +101,7 @@ build/
 # LaTeX minted output
 _minted-*/
 _minted-rp2040_uwb_progress/
+Research_backup/
 
 # Ignore this project’s main TeX source file
 #rp2040_uwb_progress.tex
