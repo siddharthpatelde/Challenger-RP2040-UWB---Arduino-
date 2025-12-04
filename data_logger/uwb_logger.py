@@ -3,6 +3,7 @@ import time
 import csv
 import os
 
+
 # --- CONFIGURATION ---
 SERIAL_PORT = '/dev/cu.usbmodem1201' # Check your port!
 BAUD_RATE = 115200
@@ -12,6 +13,9 @@ SAMPLES_TO_COLLECT = 1000  # Will stop automatically after this many
 def collect_data():
     # 1. Determine where to save the file (same folder as this script)
     script_dir = os.path.dirname(os.path.abspath(__file__))
+
+    csv_dir = os.path.join(script_dir, "CSVs")
+    os.makedirs(csv_dir, exist_ok=True)
 
     # 2. Connect to Serial
     try:
@@ -26,6 +30,7 @@ def collect_data():
     if not filename_input.endswith(".csv"):
         filename_input += ".csv"
     
+
     # Create the full path
     full_path = os.path.join(script_dir, filename_input)
 

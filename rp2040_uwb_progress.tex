@@ -503,6 +503,39 @@ into more convenient, \emph{processed} data structures:
 	\end{figure}
 	
 	\newpage
+	
+	% ====================================================
+	\section{Plan for Calibration and Data Logging}
+	\label{sec:calibration-plan}
+	% ====================================================
+	
+	The goal of this section is to set up and document a complete workflow for
+	collecting and analysing UWB distance measurements between one anchor and one
+	tag. In the following subsections we will:
+	
+	\begin{tcolorbox}[title=Objectives of this section,
+		colback=accentlight!60!white,
+		sharp corners]
+		\begin{enumerate}
+			\item \textbf{Create a Python data-logging script} that records all received
+			distance measurements together with precise timestamps and stores them
+			in CSV files.
+			\item \textbf{Build a reproducible physical setup} where the two UWB nodes
+			are mounted at the same height above the ground and placed at defined
+			distances (e.g.\ 1\,m, 2\,m, 4\,m, 8\,m, 16\,m).
+			\item \textbf{Run calibration experiments} for different configured sampling
+			rates and distances, and save the raw data as
+			\texttt{time\_ms, distance\_uwb\_m} CSV files.
+			\item \textbf{Process the CSV data in Python} to compute, for each setup:
+			the actual measurement frequency (Hz), mean distance and standard
+			deviation, and compare these values with the real distances and
+			configured sampling rates.
+		\end{enumerate}
+	\end{tcolorbox}
+	
+	The next subsections describe these steps one by one: Python logger, physical
+	measurement setup, experiment runs, and offline data analysis.
+	
 %	% ====================================================
 %	\section{Conclusion and Outlook}
 %	\label{sec:conclusion}
