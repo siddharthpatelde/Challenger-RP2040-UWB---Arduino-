@@ -37,7 +37,7 @@ static dwt_config_t config = {
 };
 
 /* Inter-ranging delay period, in milliseconds. */
-#define RNG_DELAY_MS 0.1 //10Hz = 100ms, 20Hz = 50ms, 40Hz = 25ms, 60Hz = 16.7ms, 80Hz = 12,5ms, 100Hz = 10ms, 200hz = 5ms, 1KHz = 1ms, 10Khz = 0.01
+#define RNG_DELAY_MS 16.7 //10Hz = 100ms, 20Hz = 50ms, 40Hz = 25ms, 60Hz = 16.7ms, 80Hz = 12,5ms, 100Hz = 10ms, 200hz = 5ms, 1KHz = 1ms, 10Khz = 0.01
 
 /* Default antenna delay values for 64 MHz PRF. See NOTE 2 below. */
 #define TX_ANT_DLY 16385
