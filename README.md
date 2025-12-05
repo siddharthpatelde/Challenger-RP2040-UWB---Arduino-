@@ -25,16 +25,14 @@ This project shows how to program the Challenger RP2040 UWB module with the Ardu
   - [x] 0.b) Challenger DWM3000  
   - [x] Set up interfaces, e.g. Thonny, Arduino IDE, Windows Serial Debug Assistant  
   - [x] Basic documentation and simple test program (e.g. LED blink)  
-  - UPDATE: see Challenger solution from Siddharth (thanks!):  
-    https://github.com/siddharthpatelde/Challenger-RP2040-UWB---Arduino-/blob/main/rp2040_uwb_progress.pdf  
 
-- [x] 1. Create calibration data locally on the Pico/Challenger (requires 1 anchor and 1 tag)  
+- [x] ~~1. Create calibration data locally on the Pico/Challenger (requires 1 anchor and 1 tag)  ~~
   - [x] 1.a) Create a table:  
         `Distance (measured, real) | Distance (via UWB)`  
   - [x] 1.b) For 1 m, 2 m, 4 m, 8 m, 16 m collect 1000 data points each and save as CSV  
   - [x] 1.c) Evaluate accuracy and precision (mean values, variances) on the PC; transfer the data from the Pico to the PC  
 
-- [x] 2. Determine / measure maximum data rate (requires 1 anchor and 1 tag)  
+- [x] ~~2. Determine / measure maximum data rate (requires 1 anchor and 1 tag)  ~~
   - [x] 2.a) Store distance data with timestamp (ms range) locally on the Pico, at least 1000 measurements  
         Table: `time | Distance (via UWB)`  
         Goal: determine measurement rate (frequency) and vary the data rate parameter (via AT commands on BU03, Challenger?)  

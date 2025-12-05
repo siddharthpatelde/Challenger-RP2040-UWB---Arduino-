@@ -33,6 +33,7 @@
 
 \definecolor{tblhead}{gray}{0.9} % header background color
 
+
 % left-aligned paragraph column
 \newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
 
@@ -40,7 +41,7 @@
 \usepackage{minted}   % remember: compile with -shell-escape
 
 
-
+\usepackage{siunitx}
 
 \usepackage{hyperref}
 \hypersetup{
@@ -464,18 +465,23 @@ into more convenient, \emph{processed} data structures:
 	as a receiver and prints the raw information from every incoming UWB frame
 	(timestamps, frame bytes, CIR, diagnostics, \dots) to the serial console.
 	
-	\begin{tcolorbox}[colback=black!2,
-		boxrule=0.3pt,
-		sharp corners,
-		breakable,
-		left=6pt,right=6pt,top=6pt,bottom=6pt]
-		\inputminted[
-		fontsize=\small,
-		breaklines,
-		linenos
-		]{c++}{rx_raw_data_demo/rx_raw_data_demo.ino}
-	\end{tcolorbox}
+		\begin{itemize}
+		\item \textbf{Fram grabber}: \texttt{rx\_raw\_data\_demo.ino}\footnote{\url{https://github.com/siddharthpatelde/Challenger-RP2040-UWB---Arduino-/blob/main/rx_raw_data_demo/rx_raw_data_demo.ino}}
+
+	\end{itemize}
 	
+%	\begin{tcolorbox}[colback=black!2,
+%		boxrule=0.3pt,
+%		sharp corners,
+%		breakable,
+%		left=6pt,right=6pt,top=6pt,bottom=6pt]
+%		\inputminted[
+%		fontsize=\small,
+%		breaklines,
+%		linenos
+%		]{c++}{rx_raw_data_demo/rx_raw_data_demo.ino}
+%	\end{tcolorbox}
+%	
 	\newpage
 	
 	% ====================================================
@@ -535,6 +541,783 @@ into more convenient, \emph{processed} data structures:
 	
 	The next subsections describe these steps one by one: Python logger, physical
 	measurement setup, experiment runs, and offline data analysis.
+	
+	\subsection{Python data logger and UWB initiator setup}
+	\label{subsec:uwb-logger-setup}
+	
+	 In order to log the data as described, a simple data publishing
+	\texttt{.ino} file was first created for the Challenger RP2040 UWB module,
+	based on the single-sided TWR example code.
+	
+	The new initiator sketch can be found here:\footnote{\url{https://github.com/siddharthpatelde/Challenger-RP2040-UWB---Arduino-/blob/main/data_logger/ss_twr_init/ss_twr_init.ino}}
+	
+	\begin{tcolorbox}[title=UWB initiator and responder setup,
+		colback=accentlight!60!white,
+		sharp corners]
+		\begin{enumerate}
+			\item Load \texttt{ss\_twr\_init.ino} on the first UWB Challenger module.  
+			This module acts as the \textbf{initiator} and outputs distance values.
+			\item On the second UWB module, load the example responder sketch:\footnote{\url{https://github.com/PontusO/iLabs_UWB/blob/main/examples/ex_06b_ss_twr_responder/ex_06b_ss_twr_responder.ino}}  
+			\texttt{ex\_06b\_ss\_twr\_responder.ino}.  
+			This module acts as the \textbf{responder}.
+		\end{enumerate}
+	\end{tcolorbox}
+	
+	After this setup is running, the distance values from the initiator are logged
+	using a Python script.
+	
+	The Python file is called \texttt{uwb\_logger.py} and is located in the
+	\texttt{/data\_logger} folder of the GitHub repository (link not fixed here,
+	because the exact path may change in the future).
+	
+	\begin{tcolorbox}[title=Python data logger configuration,
+		colback=accentlight!60!white,
+		sharp corners]
+		In \texttt{uwb\_logger.py}, set at least:
+		
+		\begin{itemize}
+			\item the serial port where the UWB initiator is connected,
+			\item the number of samples to collect.
+		\end{itemize}
+		
+		Example configuration:
+		\begin{minted}[fontsize=\small]{python}
+			SERIAL_PORT        = '/dev/cu.usbmodemXXXX'
+			BAUD_RATE          = 115200
+			SAMPLES_TO_COLLECT = 1000
+		\end{minted}
+		
+		After running \texttt{uwb\_logger.py} with these parameters, the logged data
+		(distances with timestamps) is automatically saved into a CSV file with the
+		chosen output filename.
+	\end{tcolorbox}
+	
+	\subsection{Physical UWB measurement setup}
+	\label{subsec:uwb-physical-setup}
+	
+	Now that the distance values can be logged over time, a stable mechanical setup
+	was built so that both UWB modules are mounted at the same height and their
+	\emph{antenna–to–antenna distance} can be adjusted precisely.
+	
+	Both boards are fixed in 3D-printed PCB holders. The holders are attached to
+	the table (responder) and to a cardboard box (initiator) so that the antennas
+	are aligned horizontally. With this setup the distance can be set reproducibly
+	to \SI{1}{m}, \SI{2}{m}, \SI{4}{m}, \SI{8}{m} and \SI{12}{m}.  
+	(As will be shown later, at \SI{16}{m} separation no reliable data was
+	received in this configuration.)
+	
+	\begin{figure}[H]
+		\centering
+		\begin{minipage}[t]{0.47\linewidth}
+			\centering
+			\includegraphics[width=\linewidth]{figures/initiator}% <- initiator mount image
+			\vspace{0.3em}
+			
+			\footnotesize UWB initiator mounted in a 3D-printed holder on a cardboard box,
+			antenna aligned with the tape measure.
+		\end{minipage}
+		\hfill
+		\begin{minipage}[t]{0.47\linewidth}
+			\centering
+			\includegraphics[width=\linewidth]{figures/responder}% <- responder mount image
+			\vspace{0.3em}
+			
+			\footnotesize UWB responder mounted at the same height on the table edge,
+			again with a 3D-printed holder.
+		\end{minipage}
+		
+		\caption{Mechanical mounting of the Challenger RP2040 UWB boards for
+			reproducible antenna–to–antenna distances.}
+		\label{fig:uwb-mounts}
+	\end{figure}
+	
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.9\linewidth]{figures/setup}% <- overall setup image
+		\caption{Complete measurement setup: initiator on the box, responder on the
+			table, tape measure for distance settings, and laptop running the
+			\texttt{uwb\_logger.py} script.}
+		\label{fig:uwb-complete-setup}
+	\end{figure}
+	
+	\subsection{Calibration runs for different target sampling rates}
+	\label{subsec:calib-runs}
+	
+	To run the calibration experiments we use
+	
+	\begin{itemize}
+		\item the Python logger \texttt{uwb\_logger.py} from
+		Section~\ref{subsec:uwb-logger-setup}, and
+		\item the physical setup from Section~\ref{subsec:uwb-physical-setup}.
+	\end{itemize}
+	
+	The question is: \emph{how do we change the frequency of the distance
+		measurements?}  
+	This is done directly in the UWB initiator sketch
+	\texttt{ss\_twr\_init.ino} by adjusting the inter-ranging delay:
+	
+	\begin{tcolorbox}[colback=black!2,
+		sharp corners,
+		boxrule=0.3pt]
+		\begin{minted}[fontsize=\small]{c++}
+			/* Inter-ranging delay period, in milliseconds. */
+			#define RNG_DELAY_MS 16.7
+			// 10 Hz  = 100 ms
+			// 20 Hz  =  50 ms
+			// 40 Hz  =  25 ms
+			// 60 Hz  =  16.7 ms
+			// 80 Hz  =  12.5 ms
+			// 100 Hz =  10 ms
+			// 200 Hz =   5 ms
+			// 1 kHz  =   1 ms
+			// 10 kHz =   0.1 ms
+		\end{minted}
+	\end{tcolorbox}
+	
+	For each combination of distance and target sampling rate, the logger is run
+	until the configured number of samples is collected. The CSV files are stored
+	in the \texttt{/data\_logger/CSVs} folder of the GitHub repository.\footnote{\url{https://github.com/siddharthpatelde/Challenger-RP2040-UWB---Arduino-/tree/main/data_logger/CSVs}}
+	
+	The naming scheme is:
+	
+	\begin{center}
+		\texttt{<XX>m\_<XX>Hz.csv}
+	\end{center}
+	
+	Table~\ref{tab:csv-files} shows all generated filenames (file extension
+	\texttt{.csv} omitted for brevity).
+	
+\begin{table}[h]
+	\centering
+	\scriptsize
+	\caption{Generated calibration files for each distance and target sampling rate
+		(file names without \texttt{.csv})}
+	\label{tab:csv-files}
+	\setlength{\tabcolsep}{2pt}
+	\begin{tabular}{p{1.2cm}*{9}{p{1.5cm}}}
+		\toprule
+		\cmidrule(lr){1-10}
+		\textbf{Distance / Rate } &
+		10 Hz & 20 Hz & 40 Hz & 60 Hz & 80 Hz & 100 Hz & 200 Hz & 1 kHz & 10 kHz \\
+		\midrule
+		1 m  &
+		\texttt{1m\_10Hz}   &
+		\texttt{1m\_20Hz}   &
+		\texttt{1m\_40Hz}   &
+		\texttt{1m\_60Hz}   &
+		\texttt{1m\_80Hz}   &
+		\texttt{1m\_100Hz}  &
+		\texttt{1m\_200Hz}  &
+		\texttt{1m\_1000Hz} &
+		\texttt{1m\_10000Hz} \\
+		2 m  &
+		\texttt{2m\_10Hz}   &
+		\texttt{2m\_20Hz}   &
+		\texttt{2m\_40Hz}   &
+		\texttt{2m\_60Hz}   &
+		\texttt{2m\_80Hz}   &
+		\texttt{2m\_100Hz}  &
+		\texttt{2m\_200Hz}  &
+		\texttt{2m\_1000Hz} &
+		\texttt{2m\_10000Hz} \\
+		4 m  &
+		\texttt{4m\_10Hz}   &
+		\texttt{4m\_20Hz}   &
+		\texttt{4m\_40Hz}   &
+		\texttt{4m\_60Hz}   &
+		\texttt{4m\_80Hz}   &
+		\texttt{4m\_100Hz}  &
+		\texttt{4m\_200Hz}  &
+		\texttt{4m\_1000Hz} &
+		\texttt{4m\_10000Hz} \\
+		8 m  &
+		\texttt{8m\_10Hz}   &
+		\texttt{8m\_20Hz}   &
+		\texttt{8m\_40Hz}   &
+		\texttt{8m\_60Hz}   &
+		\texttt{8m\_80Hz}   &
+		\texttt{8m\_100Hz}  &
+		\texttt{8m\_200Hz}  &
+		\texttt{8m\_1000Hz} &
+		\texttt{8m\_10000Hz} \\
+		12 m &
+		\texttt{12m\_10Hz}   &
+		\texttt{12m\_20Hz}   &
+		\texttt{12m\_40Hz}   &
+		\texttt{12m\_60Hz}   &
+		\texttt{12m\_80Hz}   &
+		\texttt{12m\_100Hz}  &
+		\texttt{12m\_200Hz}  &
+		\texttt{12m\_1000Hz} &
+		\texttt{12m\_10000Hz} \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+	
+	It is important to note that the sampling rate configured in the Arduino sketch
+	(e.g.\ 100~Hz) does \emph{not} guarantee that we will actually receive data at
+	exactly this frequency. Packet loss, processing overhead on the microcontroller
+	and other timing effects can reduce or jitter the effective data rate.  
+	Therefore we record data for different distances and target rates and later
+	compare:
+	
+	\begin{itemize}
+		\item the \textbf{target} frequency (from \texttt{RNG\_DELAY\_MS}),
+		\item the \textbf{actual} frequency computed from timestamps in the CSV, and
+		\item the \textbf{measured} distances versus the real physical distances.
+	\end{itemize}
+	
+	\subsection{Processing the CSV data in Python}
+	\label{subsec:python-processing}
+	
+	Now that all CSV files contain time stamps and distances in a consistent format,
+	they are processed with the Python script \texttt{plot\_uwb\_logs.py} in the
+	\texttt{data\_logger} folder.\footnote{\url{https://github.com/siddharthpatelde/Challenger-RP2040-UWB---Arduino-/tree/main/data_logger}}
+	
+	For each CSV file the script
+	
+	\begin{itemize}
+		\item loads the data,
+		\item computes mean distance, standard deviation and effective sampling rate,
+		\item creates a plot (measured distance vs.\ time and summary statistics),
+		\item and saves it as a PNG image in \texttt{data\_logger/plots/} with the
+		same base name as the CSV file.
+	\end{itemize}
+	
+	A typical call looks like this:
+	
+	\begin{tcolorbox}[colback=black!2, sharp corners, boxrule=0.3pt]
+		\begin{minted}[fontsize=\small]{bash}
+			python plot_uwb_logs.py data_logger/CSVs
+		\end{minted}
+	\end{tcolorbox}
+	
+	The resulting plots are named like the CSV files, e.g.\
+	
+	\begin{center}
+		\texttt{1m\_10Hz.csv} $\rightarrow$ \texttt{1m\_10Hz.png}
+	\end{center}
+	
+	Below, all plots are grouped by distance. Each page shows the nine target
+	sampling rates for one distance in a \(3 \times 3\) grid; the caption under
+	each plot is simply its file name.
+	
+	% ---------- 1 m ----------
+	\begin{figure}[H]
+		\centering
+		\scriptsize
+		\begin{tabular}{ccc}
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/1m_10Hz}
+				
+				\texttt{1m\_10Hz.png}
+			\end{minipage} &
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/1m_20Hz}
+				
+				\texttt{1m\_20Hz.png}
+			\end{minipage} &
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/1m_40Hz}
+				
+				\texttt{1m\_40Hz.png}
+			\end{minipage} \\[0.7em]
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/1m_60Hz}
+				
+				\texttt{1m\_60Hz.png}
+			\end{minipage} &
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/1m_80Hz}
+				
+				\texttt{1m\_80Hz.png}
+			\end{minipage} &
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/1m_100Hz}
+				
+				\texttt{1m\_100Hz.png}
+			\end{minipage} \\[0.7em]
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/1m_200Hz}
+				
+				\texttt{1m\_200Hz.png}
+			\end{minipage} &
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/1m_1000Hz}
+				
+				\texttt{1m\_1000Hz.png}
+			\end{minipage} &
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/1m_10000Hz}
+				
+				\texttt{1m\_10000Hz.png}
+			\end{minipage}
+		\end{tabular}
+		\caption{Plots for distance \SI{1}{m} at all configured target sampling rates.}
+		\label{fig:plots-1m}
+	\end{figure}
+	
+	% ---------- 2 m ----------
+	\begin{figure}[H]
+		\centering
+		\scriptsize
+		\begin{tabular}{ccc}
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/2m_10Hz}
+				
+				\texttt{2m\_10Hz.png}
+			\end{minipage} &
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/2m_20Hz}
+				
+				\texttt{2m\_20Hz.png}
+			\end{minipage} &
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/2m_40Hz}
+				
+				\texttt{2m\_40Hz.png}
+			\end{minipage} \\[0.7em]
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/2m_60Hz}
+				
+				\texttt{2m\_60Hz.png}
+			\end{minipage} &
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/2m_80Hz}
+				
+				\texttt{2m\_80Hz.png}
+			\end{minipage} &
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/2m_100Hz}
+				
+				\texttt{2m\_100Hz.png}
+			\end{minipage} \\[0.7em]
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/2m_200Hz}
+				
+				\texttt{2m\_200Hz.png}
+			\end{minipage} &
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/2m_1000Hz}
+				
+				\texttt{2m\_1000Hz.png}
+			\end{minipage} &
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/2m_10000Hz}
+				
+				\texttt{2m\_10000Hz.png}
+			\end{minipage}
+		\end{tabular}
+		\caption{Plots for distance \SI{2}{m} at all configured target sampling rates.}
+		\label{fig:plots-2m}
+	\end{figure}
+	
+	% ---------- 4 m ----------
+	\begin{figure}[H]
+		\centering
+		\scriptsize
+		\begin{tabular}{ccc}
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/4m_10Hz}
+				
+				\texttt{4m\_10Hz.png}
+			\end{minipage} &
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/4m_20Hz}
+				
+				\texttt{4m\_20Hz.png}
+			\end{minipage} &
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/4m_40Hz}
+				
+				\texttt{4m\_40Hz.png}
+			\end{minipage} \\[0.7em]
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/4m_60Hz}
+				
+				\texttt{4m\_60Hz.png}
+			\end{minipage} &
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/4m_80Hz}
+				
+				\texttt{4m\_80Hz.png}
+			\end{minipage} &
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/4m_100Hz}
+				
+				\texttt{4m\_100Hz.png}
+			\end{minipage} \\[0.7em]
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/4m_200Hz}
+				
+				\texttt{4m\_200Hz.png}
+			\end{minipage} &
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/4m_1000Hz}
+				
+				\texttt{4m\_1000Hz.png}
+			\end{minipage} &
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/4m_10000Hz}
+				
+				\texttt{4m\_10000Hz.png}
+			\end{minipage}
+		\end{tabular}
+		\caption{Plots for distance \SI{4}{m} at all configured target sampling rates.}
+		\label{fig:plots-4m}
+	\end{figure}
+	
+	% ---------- 8 m ----------
+	\begin{figure}[H]
+		\centering
+		\scriptsize
+		\begin{tabular}{ccc}
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/8m_10Hz}
+				
+				\texttt{8m\_10Hz.png}
+			\end{minipage} &
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/8m_20Hz}
+				
+				\texttt{8m\_20Hz.png}
+			\end{minipage} &
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/8m_40Hz}
+				
+				\texttt{8m\_40Hz.png}
+			\end{minipage} \\[0.7em]
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/8m_60Hz}
+				
+				\texttt{8m\_60Hz.png}
+			\end{minipage} &
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/8m_80Hz}
+				
+				\texttt{8m\_80Hz.png}
+			\end{minipage} &
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/8m_100Hz}
+				
+				\texttt{8m\_100Hz.png}
+			\end{minipage} \\[0.7em]
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/8m_200Hz}
+				
+				\texttt{8m\_200Hz.png}
+			\end{minipage} &
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/8m_1000Hz}
+				
+				\texttt{8m\_1000Hz.png}
+			\end{minipage} &
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/8m_10000Hz}
+				
+				\texttt{8m\_10000Hz.png}
+			\end{minipage}
+		\end{tabular}
+		\caption{Plots for distance \SI{8}{m} at all configured target sampling rates.}
+		\label{fig:plots-8m}
+	\end{figure}
+	
+	% ---------- 12 m ----------
+	\begin{figure}[H]
+		\centering
+		\scriptsize
+		\begin{tabular}{ccc}
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/12m_10Hz}
+				
+				\texttt{12m\_10Hz.png}
+			\end{minipage} &
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/12m_20Hz}
+				
+				\texttt{12m\_20Hz.png}
+			\end{minipage} &
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/12m_40Hz}
+				
+				\texttt{12m\_40Hz.png}
+			\end{minipage} \\[0.7em]
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/12m_60Hz}
+				
+				\texttt{12m\_60Hz.png}
+			\end{minipage} &
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/12m_80Hz}
+				
+				\texttt{12m\_80Hz.png}
+			\end{minipage} &
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/12m_100Hz}
+				
+				\texttt{12m\_100Hz.png}
+			\end{minipage} \\[0.7em]
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/12m_200Hz}
+				
+				\texttt{12m\_200Hz.png}
+			\end{minipage} &
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/12m_1000Hz}
+				
+				\texttt{12m\_1000Hz.png}
+			\end{minipage} &
+			\begin{minipage}[b]{0.3\linewidth}\centering
+				\includegraphics[width=\linewidth]{data_logger/plots/12m_10000Hz}
+				
+				\texttt{12m\_10000Hz.png}
+			\end{minipage}
+		\end{tabular}
+		\caption{Plots for distance \SI{12}{m} at all configured target sampling rates.}
+		\label{fig:plots-12m}
+	\end{figure}
+	
+\subsection{ Accuracy, Precision and Effective update rate}
+\label{subsec:uwb-eval-metrics}
+
+Recalling the original goal (Tasks 1.c and 2.b), the recorded UWB logs were
+used to evaluate
+
+\begin{itemize}
+	\item the \textbf{effective measurement frequency} $f_{\text{meas}}$,
+	\item the \textbf{accuracy} of the distance estimate (mean error), and
+	\item the \textbf{precision} (spread of the measurements).
+\end{itemize}
+
+Each CSV file contains a time stamp $t_i$ in milliseconds and a measured
+distance $d_i$ in metres, with typically $N = 1000$ samples.
+
+\begin{itemize}
+	\item \textbf{Actual update rate $f_{\text{meas}}$:}  
+	For consecutive samples the time difference is
+	\begin{equation}
+		\Delta t_i = t_i - t_{i-1} \, .
+	\end{equation}
+	With time stamps in milliseconds, the effective update rate is computed as
+	the inverse of the average time step:
+	\begin{equation}
+		f_{\text{meas}} = \frac{1000}{\frac{1}{N-1} \sum_{i=2}^{N} \Delta t_i}
+		\quad [\text{Hz}] \; .
+	\end{equation}
+	
+	\item \textbf{Accuracy (mean error):}  
+	The arithmetic mean of all measured distances is
+	\begin{equation}
+		\bar{d} = \frac{1}{N} \sum_{i=1}^{N} d_i \, .
+	\end{equation}
+	The systematic error with respect to the ground-truth distance
+	$d_{\text{target}}$ is
+	\begin{equation}
+		\text{Error} = \bar{d} - d_{\text{target}} \, .
+	\end{equation}
+	
+	\item \textbf{Precision (standard deviation):}  
+	The spread of the measurements is described by the sample standard deviation
+	\begin{equation}
+		\sigma = \sqrt{\frac{1}{N-1} \sum_{i=1}^{N} (d_i - \bar{d})^2 } \; .
+	\end{equation}
+\end{itemize}
+
+All metrics were computed automatically in Python using the script
+\texttt{analyze\_uwb\_data.py} in the \texttt{data\_logger} folder.\footnote{\url{https://github.com/siddharthpatelde/Challenger-RP2040-UWB---Arduino-/blob/main/data_logger/analyze_uwb_data.py}}
+The resulting summary table is stored as
+\texttt{UWB\_Analysis\_Summary.csv} in the same repository.\footnote{\url{https://github.com/siddharthpatelde/Challenger-RP2040-UWB---Arduino-/blob/main/data_logger/UWB_Analysis_Summary.csv}}
+
+Table~\ref{tab:uwb-summary} shows the evaluation results for all recorded
+runs, grouped by distance and target sampling rate.
+
+\begin{table}[h]
+	\centering
+	\scriptsize
+	\caption{Summary of target vs.\ measured update rate and distance statistics
+		for all calibration runs.}
+	\label{tab:uwb-summary}
+	\begin{tabular}{lrrrr}
+		\toprule
+		\textbf{File} &
+		\textbf{Target [Hz]} &
+		\textbf{Actual [Hz]} &
+		\textbf{Mean dist [m]} &
+		\textbf{Std dev [m]} \\
+		\midrule
+		12m\_10000Hz & 10000.0 & 22.45  & 12.2191 & 0.1595 \\
+		12m\_1000Hz  & 1000.0  & 83.28  & 12.1634 & 0.0480 \\
+		12m\_100Hz   & 100.0   & 20.56  & 12.3539 & 0.1956 \\
+		12m\_10Hz    & 10.0    & 5.64   & 12.1230 & 0.1242 \\
+		12m\_200Hz   & 200.0   & 102.19 & 12.2089 & 0.0996 \\
+		12m\_20Hz    & 20.0    & 2.52   & 12.1197 & 0.1674 \\
+		12m\_40Hz    & 40.0    & 12.20  & 12.3065 & 0.1107 \\
+		12m\_60Hz    & 60.0    & 24.00  & 12.3444 & 0.1470 \\
+		12m\_80Hz    & 80.0    & 64.86  & 12.4500 & 0.1250 \\
+		1m\_10000Hz  & 10000.0 & 606.93 & 1.0705  & 0.0277 \\
+		1m\_1000Hz   & 1000.0  & 202.06 & 1.0393  & 0.0238 \\
+		1m\_100Hz    & 100.0   & 80.53  & 1.0215  & 0.0288 \\
+		1m\_10Hz     & 10.0    & 6.62   & 1.0235  & 0.0236 \\
+		1m\_200Hz    & 200.0   & 166.67 & 1.0088  & 0.0253 \\
+		1m\_20Hz     & 20.0    & 19.63  & 1.0039  & 0.0227 \\
+		1m\_40Hz     & 40.0    & 27.21  & 1.0209  & 0.0196 \\
+		1m\_60Hz     & 60.0    & 32.45  & 1.0171  & 0.0258 \\
+		1m\_80Hz     & 80.0    & 40.81  & 1.0220  & 0.0254 \\
+		2m\_10000Hz  & 10000.0 & 666.44 & 2.0160  & 0.0111 \\
+		2m\_1000Hz   & 1000.0  & 500.00 & 2.0125  & 0.0177 \\
+		2m\_100Hz    & 100.0   & 90.91  & 2.0112  & 0.0200 \\
+		2m\_10Hz     & 10.0    & 9.90   & 1.9866  & 0.0167 \\
+		2m\_200Hz    & 200.0   & 76.24  & 2.0145  & 0.0174 \\
+		2m\_20Hz     & 20.0    & 11.43  & 2.0004  & 0.0127 \\
+		2m\_40Hz     & 40.0    & 38.46  & 1.9936  & 0.0112 \\
+		2m\_60Hz     & 60.0    & 58.82  & 1.9954  & 0.0146 \\
+		2m\_80Hz     & 80.0    & 76.92  & 1.9979  & 0.0209 \\
+		4m\_10000Hz  & 10000.0 & 612.51 & 4.0219  & 0.0276 \\
+		4m\_1000Hz   & 1000.0  & 500.00 & 4.0253  & 0.0288 \\
+		4m\_100Hz    & 100.0   & 90.91  & 4.0305  & 0.0274 \\
+		4m\_10Hz     & 10.0    & 6.60   & 4.0287  & 0.0281 \\
+		4m\_200Hz    & 200.0   & 166.67 & 4.0324  & 0.0298 \\
+		4m\_20Hz     & 20.0    & 19.51  & 4.0304  & 0.0259 \\
+		4m\_40Hz     & 40.0    & 38.46  & 4.0287  & 0.0251 \\
+		4m\_60Hz     & 60.0    & 58.82  & 4.0298  & 0.0261 \\
+		4m\_80Hz     & 80.0    & 76.92  & 4.0318  & 0.0266 \\
+		8m\_10000Hz  & 10000.0 & 619.73 & 8.4034  & 0.3304 \\
+		8m\_1000Hz   & 1000.0  & 500.00 & 8.5824  & 0.1965 \\
+		8m\_100Hz    & 100.0   & 90.91  & 8.4391  & 0.3112 \\
+		8m\_10Hz     & 10.0    & 9.89   & 8.4376  & 0.2829 \\
+		8m\_200Hz    & 200.0   & 166.67 & 8.4667  & 0.3338 \\
+		8m\_20Hz     & 20.0    & 19.61  & 8.3350  & 0.2629 \\
+		8m\_40Hz     & 40.0    & 22.94  & 8.1871  & 0.3061 \\
+		8m\_60Hz     & 60.0    & 46.90  & 8.5691  & 0.1791 \\
+		8m\_80Hz     & 80.0    & 76.92  & 8.5040  & 0.2358 \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+	
+	
+	
+%	\subsection{Evaluation of accuracy, precision and effective update rate}
+%	\label{subsec:uwb-eval-metrics}
+%	
+%	Recalling the original goal (Tasks 1.c and 2.b), the recorded UWB logs were
+%	used to evaluate
+%	
+%	\begin{itemize}
+%		\item the \textbf{effective measurement frequency} $f_{\text{meas}}$,
+%		\item the \textbf{accuracy} of the distance estimate (mean error), and
+%		\item the \textbf{precision} (spread of the measurements).
+%	\end{itemize}
+%	
+%	Each CSV file contains a time stamp $t_i$ in milliseconds and a measured
+%	distance $d_i$ in metres, with typically $N = 1000$ samples.
+%	
+%	\begin{itemize}
+%		\item \textbf{Actual update rate $f_{\text{meas}}$:}  
+%		For consecutive samples the time difference is
+%		\begin{equation}
+%			\Delta t_i = t_i - t_{i-1} \, .
+%		\end{equation}
+%		With time stamps in milliseconds, the effective update rate is computed as
+%		the inverse of the average time step:
+%		\begin{equation}
+%			f_{\text{meas}} = \frac{1000}{\frac{1}{N-1} \sum_{i=2}^{N} \Delta t_i}
+%			\quad [\text{Hz}] \; .
+%		\end{equation}
+%		
+%		\item \textbf{Accuracy (mean error):}  
+%		The arithmetic mean of all measured distances is
+%		\begin{equation}
+%			\bar{d} = \frac{1}{N} \sum_{i=1}^{N} d_i \, .
+%		\end{equation}
+%		The systematic error with respect to the ground-truth distance
+%		$d_{\text{target}}$ is
+%		\begin{equation}
+%			\text{Error} = \bar{d} - d_{\text{target}} \, .
+%		\end{equation}
+%		
+%		\item \textbf{Precision (standard deviation):}  
+%		The spread of the measurements is described by the sample standard deviation
+%		\begin{equation}
+%			\sigma = \sqrt{\frac{1}{N-1} \sum_{i=1}^{N} (d_i - \bar{d})^2 } \; .
+%		\end{equation}
+%	\end{itemize}
+%	
+%	All metrics were computed automatically in Python using the script
+%	\texttt{analyze\_uwb\_data.py} in the \texttt{data\_logger} folder.\footnote{\url{https://github.com/siddharthpatelde/Challenger-RP2040-UWB---Arduino-/blob/main/data_logger/analyze_uwb_data.py}}
+%	The resulting summary table is stored as
+%	\texttt{UWB\_Analysis\_Summary.csv} in the same repository.\footnote{\url{https://github.com/siddharthpatelde/Challenger-RP2040-UWB---Arduino-/blob/main/data_logger/UWB_Analysis_Summary.csv}}
+%	
+%	Table~\ref{tab:uwb-summary} shows the evaluation results for all recorded
+%	runs, grouped by distance and target sampling rate.
+%	
+%	\begin{table}[h]
+%		\centering
+%		\scriptsize
+%		\caption{Summary of target vs.\ measured update rate and distance statistics
+%			for all calibration runs.}
+%		\label{tab:uwb-summary}
+%		\rowcolors{2}{tblstripe}{white}
+%		\begin{tabular}{L{2.7cm} r r r r}
+%			\toprule
+%			\rowcolor{tblhead}
+%			\textbf{File} &
+%			\textbf{Target [Hz]} &
+%			\textbf{Actual [Hz]} &
+%			\textbf{Mean dist [m]} &
+%			\textbf{Std dev [m]} \\
+%			\midrule
+%			\texttt{12m\_10000Hz} & 10000.0 & 22.45  & 12.2191 & 0.1595 \\
+%			\texttt{12m\_1000Hz}  & 1000.0  & 83.28  & 12.1634 & 0.0480 \\
+%			\texttt{12m\_100Hz}   & 100.0   & 20.56  & 12.3539 & 0.1956 \\
+%			\texttt{12m\_10Hz}    & 10.0    & 5.64   & 12.1230 & 0.1242 \\
+%			\texttt{12m\_200Hz}   & 200.0   & 102.19 & 12.2089 & 0.0996 \\
+%			\texttt{12m\_20Hz}    & 20.0    & 2.52   & 12.1197 & 0.1674 \\
+%			\texttt{12m\_40Hz}    & 40.0    & 12.20  & 12.3065 & 0.1107 \\
+%			\texttt{12m\_60Hz}    & 60.0    & 24.00  & 12.3444 & 0.1470 \\
+%			\texttt{12m\_80Hz}    & 80.0    & 64.86  & 12.4500 & 0.1250 \\
+%			\texttt{1m\_10000Hz}  & 10000.0 & 606.93 & 1.0705  & 0.0277 \\
+%			\texttt{1m\_1000Hz}   & 1000.0  & 202.06 & 1.0393  & 0.0238 \\
+%			\texttt{1m\_100Hz}    & 100.0   & 80.53  & 1.0215  & 0.0288 \\
+%			\texttt{1m\_10Hz}     & 10.0    & 6.62   & 1.0235  & 0.0236 \\
+%			\texttt{1m\_200Hz}    & 200.0   & 166.67 & 1.0088  & 0.0253 \\
+%			\texttt{1m\_20Hz}     & 20.0    & 19.63  & 1.0039  & 0.0227 \\
+%			\texttt{1m\_40Hz}     & 40.0    & 27.21  & 1.0209  & 0.0196 \\
+%			\texttt{1m\_60Hz}     & 60.0    & 32.45  & 1.0171  & 0.0258 \\
+%			\texttt{1m\_80Hz}     & 80.0    & 40.81  & 1.0220  & 0.0254 \\
+%			\texttt{2m\_10000Hz}  & 10000.0 & 666.44 & 2.0160  & 0.0111 \\
+%			\texttt{2m\_1000Hz}   & 1000.0  & 500.00 & 2.0125  & 0.0177 \\
+%			\texttt{2m\_100Hz}    & 100.0   & 90.91  & 2.0112  & 0.0200 \\
+%			\texttt{2m\_10Hz}     & 10.0    & 9.90   & 1.9866  & 0.0167 \\
+%			\texttt{2m\_200Hz}    & 200.0   & 76.24  & 2.0145  & 0.0174 \\
+%			\texttt{2m\_20Hz}     & 20.0    & 11.43  & 2.0004  & 0.0127 \\
+%			\texttt{2m\_40Hz}     & 40.0    & 38.46  & 1.9936  & 0.0112 \\
+%			\texttt{2m\_60Hz}     & 60.0    & 58.82  & 1.9954  & 0.0146 \\
+%			\texttt{2m\_80Hz}     & 80.0    & 76.92  & 1.9979  & 0.0209 \\
+%			\texttt{4m\_10000Hz}  & 10000.0 & 612.51 & 4.0219  & 0.0276 \\
+%			\texttt{4m\_1000Hz}   & 1000.0  & 500.00 & 4.0253  & 0.0288 \\
+%			\texttt{4m\_100Hz}    & 100.0   & 90.91  & 4.0305  & 0.0274 \\
+%			\texttt{4m\_10Hz}     & 10.0    & 6.60   & 4.0287  & 0.0281 \\
+%			\texttt{4m\_200Hz}    & 200.0   & 166.67 & 4.0324  & 0.0298 \\
+%			\texttt{4m\_20Hz}     & 20.0    & 19.51  & 4.0304  & 0.0259 \\
+%			\texttt{4m\_40Hz}     & 40.0    & 38.46  & 4.0287  & 0.0251 \\
+%			\texttt{4m\_60Hz}     & 60.0    & 58.82  & 4.0298  & 0.0261 \\
+%			\texttt{4m\_80Hz}     & 80.0    & 76.92  & 4.0318  & 0.0266 \\
+%			\texttt{8m\_10000Hz}  & 10000.0 & 619.73 & 8.4034  & 0.3304 \\
+%			\texttt{8m\_1000Hz}   & 1000.0  & 500.00 & 8.5824  & 0.1965 \\
+%			\texttt{8m\_100Hz}    & 100.0   & 90.91  & 8.4391  & 0.3112 \\
+%			\texttt{8m\_10Hz}     & 10.0    & 9.89   & 8.4376  & 0.2829 \\
+%			\texttt{8m\_200Hz}    & 200.0   & 166.67 & 8.4667  & 0.3338 \\
+%			\texttt{8m\_20Hz}     & 20.0    & 19.61  & 8.3350  & 0.2629 \\
+%			\texttt{8m\_40Hz}     & 40.0    & 22.94  & 8.1871  & 0.3061 \\
+%			\texttt{8m\_60Hz}     & 60.0    & 46.90  & 8.5691  & 0.1791 \\
+%			\texttt{8m\_80Hz}     & 80.0    & 76.92  & 8.5040  & 0.2358 \\
+%			\bottomrule
+%		\end{tabular}
+%	\end{table}
+	
+	
 	
 %	% ====================================================
 %	\section{Conclusion and Outlook}
