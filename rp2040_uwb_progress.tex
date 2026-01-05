@@ -53,6 +53,8 @@
 
 % ----------------- Section styling -----------------
 \usepackage{titlesec}
+\usepackage{amsmath}
+
 
 
 % section numbers up to subsubsection
@@ -1195,7 +1197,160 @@ runs, grouped by distance and target sampling rate.
 	\end{tabular}
 \end{table}
 
+% ====================================================
+\section{UWB Ranging Techniques}
+\label{sec:uwb-ranging-techniques}
+% ====================================================
+
+Before starting the next project phase (accuracy tests by varying the ranging method),
+it is useful to understand the main UWB ranging techniques in a \emph{technology-neutral}
+way. This section is therefore intended as background knowledge only; the mapping to
+the Challenger RP2040 UWB project is done later.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\linewidth]{figures/ranging.pdf}
+	\caption{Classification of common UWB ranging techniques}
+	\label{fig:uwb-ranging-classification}
+\end{figure}
+
+Following the overview source used in this report,\footnote{\url{https://en.wikipedia.org/w/index.php?title=UWB_ranging&oldid=1318257068}}
+UWB ranging methods are commonly grouped into two core families:
+
+\begin{itemize}
+	\item \textbf{Time of Arrival (ToA)} --- also called \emph{one-way ranging}.
+	\item \textbf{Round-Trip Time (RTT)} --- also called \emph{two-way ranging (TWR)}.
+\end{itemize}
+
+\textbf{ToA (one-way ranging)} estimates distance from signal propagation time measured
+at the receiver. A closely related and widely used concept is \textbf{TDoA (Time Difference
+	of Arrival)}, which uses time differences between multiple receivers (anchors) to localize
+a transmitter.\footnote{\url{https://en.wikipedia.org/wiki/Time_of_arrival}}
+
+\textbf{RTT/TWR (two-way ranging)} estimates distance from the round-trip time of exchanged
+messages. The most common practical variants are \textbf{Single-Sided Two-Way Ranging (SS-TWR)}
+and \textbf{Double-Sided Two-Way Ranging (DS-TWR)}.\footnote{\url{https://en.wikipedia.org/w/index.php?title=UWB_ranging&oldid=1318257068}}
+In practice, DS-TWR appears in different message exchange sequences (for example 3-message
+or 4-message variants), depending on protocol and timing requirements.\footnote{See the DW3000 User Manual, Section 12.3 ``Double-sided two-way ranging'', p.~249:
+	\url{https://www.decawave.com/wp-content/uploads/2021/05/DW3000-User-Manual-1.pdf}}
+
+In addition to pure distance estimation, UWB systems can also support \textbf{Angle of Arrival (AoA)}
+to obtain directional information. One common approach is \textbf{Phase Difference of Arrival (PDoA)},
+where the angle is derived from phase differences across multiple antennas.\footnote{\url{https://en.wikipedia.org/wiki/Angle_of_arrival}}
+
+\medskip
+The next sections will build on this classification and later connect the chosen methods
+to practical measurements (update rate and measurement quality) in the Challenger RP2040 UWB setup.
+
+
+% ----------------------------------------------------
+\subsection{Single-Sided Two-Way Ranging (SS-TWR)}
+\label{subsec:ss-twr}
+
+The example codes used in the previous sections (e.g.\ the distance demo in
+Section~\ref{sec:distance-measurement} and the evaluation workflow in
+Subsection~\ref{subsec:uwb-eval-metrics}) are based on the manufacturer’s
+\emph{single-sided two-way ranging} (SS-TWR) method.
+
+In SS-TWR, the initiator measures the round-trip time $T_{\text{round}}$ between sending a poll
+and receiving the response, while the responder provides its reply time $T_{\text{reply}}$.
+Using the clock offset compensation term $C_{\text{offset}}$, the propagation time estimate is:%
+\footnote{DW3000 User Manual (Decawave/Qorvo), section ``Single-sided two-way ranging'':
+	\url{https://www.decawave.com/wp-content/uploads/2021/05/DW3000-User-Manual-1.pdf}}
 	
+	\begin{figure}[H]
+		\centering
+		
+		\includegraphics[width=0.95\linewidth]{figures/ss_twr_timing.pdf}
+		\caption{SS-TWR timing overview: $T_{\text{round}}$, $T_{\text{reply}}$, and $T_{\text{prop}}$}
+		\label{fig:ss-twr-timing}
+	\end{figure}
+
+\begin{equation}
+	\hat{T}_{\text{prop}}=\frac{1}{2}\Bigl(T_{\text{round}} - T_{\text{reply}}\,(1-C_{\text{offset}})\Bigr)
+	\label{eq:ss-twr-tprop}
+\end{equation}
+
+% --- Optional: keep a placeholder if you prefer the equation as an image ---
+% \begin{figure}[H]
+	%   \centering
+	%   \includegraphics[width=0.55\linewidth]{figures/ss_twr_equation.png}
+	%   \caption{SS-TWR propagation-time equation as given in the DW3000 User Manual}
+	%   \label{fig:ss-twr-equation}
+	% \end{figure}
+
+This equation corresponds directly to the core timing and ToF computation used in the code:
+
+\begin{tcolorbox}[
+	colback=black!2,
+	sharp corners,
+	boxrule=0.3pt,
+	left=6pt,right=6pt,top=6pt,bottom=6pt
+	]
+	\begin{minted}[fontsize=\small]{c++}
+rtd_init = resp_rx_ts - poll_tx_ts;
+rtd_resp = resp_tx_ts - poll_rx_ts;
+		
+tof = ((rtd_init - rtd_resp * (1 - clockOffsetRatio)) / 2.0) * DWT_TIME_UNITS;
+distance = tof * SPEED_OF_LIGHT;
+	\end{minted}
+\end{tcolorbox}
+
+Here, \texttt{clockOffsetRatio} implements the clock offset correction term
+$C_{\text{offset}}$ from \eqref{eq:ss-twr-tprop}. According to the same user manual,
+applying this correction improves SS-TWR accuracy and can achieve results comparable
+to DS-TWR in many practical cases.\footnote{Same source as above:
+	\url{https://www.decawave.com/wp-content/uploads/2021/05/DW3000-User-Manual-1.pdf}}
+
+% --- Timing diagram placeholder (replace filename/location as needed) ---
+
+% ----------------------------------------------------
+\subsection{Double-Sided Two-Way Ranging (DS-TWR)}
+\label{subsec:ds-twr}
+
+The \textbf{double-sided two-way ranging (DS-TWR)} method is conceptually similar to SS-TWR, but the
+round-trip measurement is performed \textbf{twice}. This results in a \textbf{four-message exchange},
+which improves robustness against clock drift effects compared to SS-TWR.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.95\linewidth]{figures/dw_4msg.pdf}
+	\caption{DS-TWR timing overview (4-message exchange).}
+	\label{fig:ds-twr-4msg}
+\end{figure}
+
+With the four-message variant, the propagation time (time-of-flight) can be computed as:%
+\footnote{DW3000 User Manual (Decawave/Qorvo), section ``Double-Sided two-way ranging'':
+	\url{https://www.decawave.com/wp-content/uploads/2021/05/DW3000-User-Manual-1.pdf}}
+\begin{equation}
+	\hat{T}_{\mathrm{prop}} =
+	\frac{
+		\left(T_{\mathrm{round1}} \cdot T_{\mathrm{round2}}\right)
+		-
+		\left(T_{\mathrm{reply1}} \cdot T_{\mathrm{reply2}}\right)
+	}{
+		T_{\mathrm{round1}} + T_{\mathrm{round2}} + T_{\mathrm{reply1}} + T_{\mathrm{reply2}}
+	}.
+	\label{eq:ds-twr-tof}
+\end{equation}
+
+In the same manual, it is mentioned that the \textbf{four-message exchange can be simplified to a
+	three-message variant}. The timing looks as follows (the same equation
+\eqref{eq:ds-twr-tof} is used for the ToF estimate):
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.95\linewidth]{figures/dw_3msg.pdf}
+	\caption{DS-TWR timing overview (3-message exchange).}
+	\label{fig:ds-twr-3msg}
+\end{figure}
+
+A practical advantage of DS-TWR is that the \textbf{clock offset largely cancels out due to the
+	symmetric exchange}, therefore an explicit clock-offset correction term is typically not required.%
+\footnote{Jia Li and Fengyun Zhang (IntechOpen), 2024, DOI: 10.5772/intechopen.1007634:
+	\url{https://www.intechopen.com/chapters/1200549}}
+
+
 	
 	
 %	\subsection{Evaluation of accuracy, precision and effective update rate}
