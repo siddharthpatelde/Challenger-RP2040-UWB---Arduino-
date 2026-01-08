@@ -39,11 +39,11 @@ This project shows how to program the Challenger RP2040 UWB module with the Ardu
         Validate the configured data rate and push it towards the maximum (target: 60–100 Hz)  
   - [x] 2.b) Evaluation (mean, variance, min, max)  
 
-- [ ] 3. Vary measurement method and repeat tasks 1 and 2  
+- [ ] ~~3. Vary measurement method and repeat tasks 1 and 2  ~~
   - Both chips support different measurement methods (e.g. TDoA, bidirectional)  
   - Compare methods regarding accuracy, precision and measurement rate  
 
-- [ ] 4. Set up a real-time data connection from Pico to host PC via USB serial  
+- [ ] ~~4. Set up a real-time data connection from Pico to host PC via USB serial~~  
   - [ ] Send Pico data to the host in (near) real-time  
   - [ ] Insert the data into a database (in-memory or SQLite)  
 
