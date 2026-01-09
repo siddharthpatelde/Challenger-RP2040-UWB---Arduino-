@@ -1263,7 +1263,7 @@ Using the clock offset compensation term $C_{\text{offset}}$, the propagation ti
 	\begin{figure}[H]
 		\centering
 		
-		\includegraphics[width=0.95\linewidth]{figures/ss_twr_timing.pdf}
+		\includegraphics[width=0.75\linewidth]{figures/ss_twr_timing.pdf}
 		\caption{SS-TWR timing overview: $T_{\text{round}}$, $T_{\text{reply}}$, and $T_{\text{prop}}$}
 		\label{fig:ss-twr-timing}
 	\end{figure}
@@ -1387,7 +1387,7 @@ $P(x,y)$.\footnote{IntechOpen, Section 3.2 ``Positioning method based on time di
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.95\linewidth]{figures/TdoA.pdf}
+	\includegraphics[width=0.75\linewidth]{figures/TdoA.pdf}
 	\caption{TDoA concept: one tag transmission received at multiple anchors, producing time-stamps $\tau_i$ and hyperbolic constraints for $P(x,y)$.}
 	\label{fig:tdoa-concept}
 \end{figure}
@@ -1459,7 +1459,7 @@ defines a circle equation.
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.95\linewidth]{figures/2d_geo.pdf}
+	\includegraphics[width=0.7\linewidth]{figures/2d_geo.pdf}
 	\caption{2D localization geometry with three anchors and one tag (trilateration principle).}
 	\label{fig:2d-geo}
 \end{figure}
@@ -1515,6 +1515,88 @@ To implement the 2D localization demo in this project, I followed a simple workf
 	real position to evaluate accuracy.
 \end{itemize}
 
+
+% ----------------------------------------------------
+% Project notes (code pointers) - in your blue box style
+% ----------------------------------------------------
+
+\begin{tcolorbox}[title=Note (project status: Sensor web --- Step 1),
+	colback=accentlight!60!white,
+	sharp corners]
+	
+	\textbf{Step 1 (Anchor + Tag logic).} The code for the multi-anchor / tag setup is available here:
+	\begin{itemize}
+		\item \url{https://github.com/siddharthpatelde/Challenger-RP2040-UWB---Arduino-/tree/main/data_logger/sensor_web}
+	\end{itemize}
+	
+	\textbf{Important:} each anchor must be flashed with \emph{unique} IDs. Example:
+	\begin{minted}[fontsize=\small]{c++}
+		/* 1. UNIQUE SETTINGS PER ANCHOR */
+		#define ANCHOR_NAME "A3"     // Change to "A1", "A2", "A3"
+		#define ANCHOR_ADDR_L 0x41   // 'A'
+		#define ANCHOR_ADDR_H 0x33   // '3' (Change to 0x31 for A1, 
+					  //  0x32 for A2, 0x33 for A3)
+	\end{minted}
+	
+\end{tcolorbox}
+
+
+\begin{tcolorbox}[title=Note (project status: Sensor web --- Steps 2 \& 3),
+	colback=accentlight!60!white,
+	sharp corners]
+	
+	\textbf{Steps 2 \& 3 (PC connection + math/visualization).}
+	To connect each anchor to the PC and apply the math from
+	\ref{subsec:2d-localization-geometry}, the serial number of each device must be known.
+	
+	\begin{itemize}
+		\item Serial device finder script:
+		\url{https://github.com/siddharthpatelde/Challenger-RP2040-UWB---Arduino-/blob/main/data_logger/serial_device_finder.py}
+		\item Visualization script (store serial numbers + anchor positions at the top):
+		\url{https://github.com/siddharthpatelde/Challenger-RP2040-UWB---Arduino-/blob/main/data_logger/sensor_web/web_vis.py}
+	\end{itemize}
+	
+	Example configuration:
+	\begin{minted}[fontsize=\small]{python}
+		ANCHOR_CONFIG = {
+			'A1': {'serial': 'DF622C6417244126', 'pos': np.array([0.0, 0.0])},
+			'A2': {'serial': 'DF622C64171D4E26', 'pos': np.array([1.2, 0.0])},
+			'A3': {'serial': 'DF622C64177E5827', 'pos': np.array([0.0, 1.2])}
+		}
+	\end{minted}
+	
+\end{tcolorbox}
+
+% ----------------------------------------------------
+% Step 4: Physical placement and comparison
+% ----------------------------------------------------
+To validate the 2D localization demo, the anchors and tag were placed physically in the room
+according to the coordinate system defined earlier. Figure~\ref{fig:2d-setup-vs-result} shows
+the real setup (left) and the corresponding real-time visualization output (right), where the
+predicted position of tag \texttt{T1} is displayed on the screen.
+
+\begin{figure}[H]
+	\centering
+	
+	\begin{minipage}{0.49\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{figures/2d_physical.png}
+		
+		\vspace{0.3em}
+		{\small \textbf{(a)} Physical setup (anchors \texttt{A1--A3} and tag \texttt{T1}).}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{0.49\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{figures/2d_real.png}
+		
+		\vspace{0.3em}
+		{\small \textbf{(b)} Predicted tag position in the real-time plot.}
+	\end{minipage}
+	
+	\caption{Physical setup and corresponding predicted tag position for the 2D localization demo.}
+	\label{fig:2d-setup-vs-result}
+\end{figure}
 
 
 	
