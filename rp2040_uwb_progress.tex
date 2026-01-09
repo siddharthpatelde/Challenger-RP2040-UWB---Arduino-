@@ -1197,6 +1197,8 @@ runs, grouped by distance and target sampling rate.
 	\end{tabular}
 \end{table}
 
+\newpage
+
 % ====================================================
 \section{UWB Ranging Techniques}
 \label{sec:uwb-ranging-techniques}
@@ -1371,6 +1373,147 @@ A practical advantage of DS-TWR is that the \textbf{clock offset largely cancels
 	\end{itemize}
 	
 \end{tcolorbox}
+
+% ----------------------------------------------------
+\subsection{Time Difference of Arrival (TDoA)}
+\label{subsec:tdoa}
+
+Time Difference of Arrival (TDoA) is a Time-of-Arrival (ToA) based positioning method where a \emph{tag}
+transmits a signal once, and multiple \emph{anchors} timestamp the reception time. Instead of using an
+absolute time-of-flight, the system uses \emph{time differences} between anchors. These time differences
+correspond to \emph{distance differences}, which form hyperbolic constraints for the unknown tag position
+$P(x,y)$.\footnote{IntechOpen, Section 3.2 ``Positioning method based on time difference of arrival'':
+	\url{https://www.intechopen.com/chapters/1200549}}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.95\linewidth]{figures/TdoA.pdf}
+	\caption{TDoA concept: one tag transmission received at multiple anchors, producing time-stamps $\tau_i$ and hyperbolic constraints for $P(x,y)$.}
+	\label{fig:tdoa-concept}
+\end{figure}
+
+Let the anchors be $A_i(x_i,y_i)$ and the unknown tag position be $P(x,y)$. If anchor $A_i$ measures a
+reception timestamp $\tau_i$, then the time-difference relative to a reference anchor (e.g.\ $A_1$) is
+
+\begin{equation}
+	\Delta \tau_{i1} = \tau_i - \tau_1 .
+\end{equation}
+
+Multiplying by the speed of light $c$ gives a \emph{difference of distances}:
+
+\begin{equation}
+	\Delta d_{i1} = c \, \Delta \tau_{i1}.
+\end{equation}
+
+This yields the standard TDoA hyperbola equation:
+
+\begin{equation}
+	\sqrt{(x-x_i)^2 + (y-y_i)^2} \;-\; \sqrt{(x-x_1)^2 + (y-y_1)^2} \;=\; \Delta d_{i1},
+	\qquad i \in \{2,3,4\}.
+\end{equation}
+
+In practice, very small clock offsets between anchors can create very large distance errors (because
+$c$ is large). Therefore, TDoA typically requires tightly synchronized anchor clocks.
+
+\begin{tcolorbox}[title=Note (project status: TDoA),
+	colback=accentlight!60!white,
+	sharp corners]
+	
+	I attempted a simple TDoA setup, but it did not work due to \textbf{unsynchronized clocks} between the
+	anchors. Even small time offsets (ms or $\mu$s) become large distance errors after multiplying by the
+	speed of light.
+	
+	If you want to see my attempt, you can view it here (\textbf{warning: this code does not work}---it is
+	only an attempt):
+	
+	\begin{itemize}
+		\item \url{https://github.com/siddharthpatelde/Challenger-RP2040-UWB---Arduino-/tree/main/data_logger/TDoA_simple}
+	\end{itemize}
+	
+\end{tcolorbox}
+
+\newpage
+
+% ====================================================
+\section{2D Localization Demo (Trilateration)}
+\label{sec:2d-localization-demo}
+% ====================================================
+
+From \ref{subsec:ss-twr} we learned that \emph{SS-TWR} already compensates the clock offset
+(via the clock offset ratio), and the achieved results are close to \emph{DS-TWR}.
+In addition, the evaluation in \ref{subsec:uwb-eval-metrics} provided a first overview of
+mean distance error, standard deviation, and the effective update rate.
+
+In the next project step, we use these distance measurements to build a first \textbf{2D localization demo}
+based on simple geometry (trilateration).
+
+
+% ----------------------------------------------------
+\subsection{How does 2D localization work?}
+\label{subsec:2d-localization-geometry}
+% ----------------------------------------------------
+
+Assume three anchors at known positions and one tag at an unknown position $(x,y)$.
+If the measured distances from the tag to the anchors are $d_1, d_2, d_3$, then each distance
+defines a circle equation.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.95\linewidth]{figures/2d_geo.pdf}
+	\caption{2D localization geometry with three anchors and one tag (trilateration principle).}
+	\label{fig:2d-geo}
+\end{figure}
+
+We choose a simple coordinate setup (for clarity):
+\begin{itemize}
+	\item Anchor $A_1$ at $(0,0)$
+	\item Anchor $A_2$ at $(L,0)$
+	\item Anchor $A_3$ at $(0,L)$
+\end{itemize}
+
+This gives:
+\begin{equation}
+	x^2 + y^2 = d_1^2
+\end{equation}
+\begin{equation}
+	(x - L)^2 + y^2 = d_2^2
+\end{equation}
+\begin{equation}
+	x^2 + (y - L)^2 = d_3^2
+\end{equation}
+
+By subtracting the first equation from the other two, we can directly solve:
+\begin{equation}
+	x = \frac{d_1^2 + L^2 - d_2^2}{2L},
+	\qquad
+	y = \frac{d_1^2 + L^2 - d_3^2}{2L}.
+\end{equation}
+
+In our physical setup, $L$ is the known anchor spacing (e.g.\ $L = 1.2~\text{m}$).
+
+% ----------------------------------------------------
+\subsection{How I managed to do this in my project}
+\label{subsec:2d-localization-project-steps}
+% ----------------------------------------------------
+
+To implement the 2D localization demo in this project, I followed a simple workflow:
+
+\begin{itemize}
+	\item \textbf{Step 1: Multi-anchor distance collection.}
+	Create a logic/code structure where multiple anchors can retrieve the distance to one tag
+	(or multiple tags, depending on the project scale).
+	
+	\item \textbf{Step 2: Send anchor data to the PC.}
+	Connect the anchors to the main PC via USB serial and stream the measured distances to the computer.
+	
+	\item \textbf{Step 3: Apply the 2D geometry on the PC.}
+	Use the distance values $(d_1, d_2, d_3)$ and compute $(x,y)$ with the equations from
+	\ref{subsec:2d-localization-geometry}. Then visualize the resulting position.
+	
+	\item \textbf{Step 4: Validate in a real room setup.}
+	Place anchors and the tag physically in the room and compare the estimated $(x,y)$ against the
+	real position to evaluate accuracy.
+\end{itemize}
 
 
 
