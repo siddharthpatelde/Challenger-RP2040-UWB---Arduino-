@@ -7,12 +7,12 @@
 
 /* COLLISION AVOIDANCE: 
    A1: 0ms, A2: 300ms, A3: 600ms. This prevents them from firing at the same time. */
-#define START_DELAY_MS 10     // Change to 300 for A2, 600 for A3
+#define START_DELAY_MS 0.01     // Change to 300 for A2, 600 for A3
 
 #define TAG_ADDR_L 0x54      // 'T'
 #define TAG_ADDR_H 0x31      // '1'
 
-#define RNG_DELAY_MS 15    // Every anchor ranges once per second
+#define RNG_DELAY_MS 0.01    // Every anchor ranges once per second
 
 /* ------------------------------------------------------------------------- */
 

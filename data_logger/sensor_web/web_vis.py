@@ -12,9 +12,9 @@ from scipy.optimize import least_squares
 # 1. CONFIGURATION (Matching your real setup)
 # ==========================================
 ANCHOR_CONFIG = {
-    'A1': {'serial': 'DF622C6417244126', 'pos': np.array([0.0, 0.0])},
-    'A2': {'serial': 'DF622C64171D4E26', 'pos': np.array([1.2, 0.0])},
-    'A3': {'serial': 'DF622C64177E5827', 'pos': np.array([0.0, 1.2])}
+    'A1': {'serial': 'DF622C6417244126', 'pos': np.array([0.0, 0.27])},
+    'A2': {'serial': 'DF622C64171D4E26', 'pos': np.array([0.27, 0.0])},
+    'A3': {'serial': 'DF622C64177E5827', 'pos': np.array([0.0, 0.0])}
 }
 
 # Global dictionary to store the latest distances from each anchor
