@@ -1,18 +1,19 @@
 #include "dw3000.h"
 
 /* 1. UNIQUE SETTINGS PER ANCHOR */
-#define ANCHOR_NAME "A3"     // Change to "A2", "A3"
+#define ANCHOR_NAME "A31"     // Change to "A2", "A3"
 #define ANCHOR_ADDR_L 0x41   // 'A'
-#define ANCHOR_ADDR_H 0x33   // '1' (Change to 0x32 for A2, 0x33 for A3)
+#define ANCHOR_ADDR_H 0x31   // '1' (Change to 0x32 for A2, 0x33 for A3)
 
 /* COLLISION AVOIDANCE: 
-   A1: 0ms, A2: 300ms, A3: 600ms. This prevents them from firing at the same time. */
-#define START_DELAY_MS 0.01     // Change to 300 for A2, 600 for A3
+   A1: 0ms, A2: 1ms, A3: 2ms. This prevents them from firing at the same time. */
+#define START_DELAY_MS 0    // Change to 300 for A2, 600 for A3
 
 #define TAG_ADDR_L 0x54      // 'T'
 #define TAG_ADDR_H 0x31      // '1'
 
-#define RNG_DELAY_MS 0.01    // Every anchor ranges once per second
+#define RNG_DELAY_MS 2   // Every anchor ranges once per second  
+//10Hz = 100ms,30Hz = 33.3, 60Hz = 16.7ms,100Hz = 10ms, 200hz = 5ms, 500Hz = 2ms
 
 /* ------------------------------------------------------------------------- */
 

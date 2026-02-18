@@ -1598,8 +1598,246 @@ predicted position of tag \texttt{T1} is displayed on the screen.
 	\label{fig:2d-setup-vs-result}
 \end{figure}
 
+% ----------------------------------------------------
+\subsection{Data logging of 2D localization distances}
+\label{subsec:2d-log-runs}
+% ----------------------------------------------------
 
+After the proof-of-concept 2D localization demo (Figure~\ref{fig:2d-setup-vs-result}),
+the next goal is to determine (i) the \textbf{maximum achievable output rate} and
+(ii) how the effective frequency and distance signals behave over longer runs
+(e.g., $N=10000$ samples).
+
+To do this, I created a separate logging workflow for the \texttt{sensor\_web} setup,
+similar in spirit to the calibration logging described earlier in
+\ref{subsec:calib-runs}. The key idea is to run the same 2D localization setup at
+different \emph{configured} ranging rates and store the resulting time series to CSV
+for later analysis.
+
+\begin{tcolorbox}[title=Note (project status: Sensor web --- data logging setup),
+	colback=accentlight!60!white,
+	sharp corners]
 	
+	\textbf{Repository folder:}
+	\begin{itemize}
+		\item \url{https://github.com/siddharthpatelde/Challenger-RP2040-UWB---Arduino-/tree/main/data_logger/sensor_web}
+	\end{itemize}
+	
+	\textbf{Step 1: Configure each anchor (IDs + collision avoidance + target rate).}
+	Each anchor must be flashed with \emph{unique} IDs and a different start delay to
+	avoid collisions. The output rate is then iterated by changing \texttt{RNG\_DELAY\_MS}.
+	
+	\begin{minted}[fontsize=\small]{c++}
+		/* 1. UNIQUE SETTINGS PER ANCHOR */
+		#define ANCHOR_NAME "A3"     // Change to "A1", "A2", "A3"
+		#define ANCHOR_ADDR_L 0x41   // 'A'
+		#define ANCHOR_ADDR_H 0x33   // '3' (Change to 0x31 for A1,
+		//  0x32 for A2, 0x33 for A3)
+		
+		/* COLLISION AVOIDANCE:
+		A1: 0ms, A2: 1ms, A3: 2ms. This prevents them from firing at the same time. */
+		#define START_DELAY_MS 0     // Example: A1=0, A2=1, A3=2
+		
+		/* Inter-ranging delay period, in milliseconds.
+		10Hz = 100ms, 30Hz = 33.3ms, 60Hz = 16.7ms, 100Hz = 10ms,
+		200Hz = 5ms, 500Hz = 2ms */
+		#define RNG_DELAY_MS 2
+	\end{minted}
+	
+	\textbf{Step 2: Log the data on the PC.}
+	After setting a target rate on the anchors, run the Python logger
+	\texttt{web\_log.py} and write the received data into CSV files
+	(one CSV per configured rate).
+	
+	\medskip
+	\textbf{Experiment configuration used in this project (2\,m scenario).}
+	The tag was placed roughly around \SI{2}{m} from the origin. The anchors were
+	defined in the PC code using:
+	
+	\begin{minted}[fontsize=\small]{python}
+		ANCHOR_CONFIG = {
+			'A1': {'serial': 'DF622C6417244126', 'pos': np.array([0.0, 0.27])},
+			'A2': {'serial': 'DF622C64171D4E26', 'pos': np.array([0.27, 0.0])},
+			'A3': {'serial': 'DF622C64177E5827', 'pos': np.array([0.0, 0.0])}
+		}
+	\end{minted}
+	
+	The experiment was executed at target rates:
+	\(\{10, 30, 60, 100, 200, 500, 555\}\,\text{Hz}\),
+	and the resulting CSV files were stored under the \texttt{CSVs/} folder in the
+	\texttt{sensor\_web} directory (see file naming in the repository).
+	
+\end{tcolorbox}
+
+In the next section, the logged datasets are evaluated to compare \textbf{target vs.\ actual}
+update rate and to inspect how the measured distances evolve over long runs
+(\(N=10000\) samples), including potential jitter, dropouts, and drift effects.
+
+	% ----------------------------------------------------
+	\subsection{2D localization distance logs (time-series plots)}
+	\label{subsec:2d-localization-logs-results}
+	% ----------------------------------------------------
+	
+	After creating the proof-of-concept 2D localization demo (Figure~\ref{fig:2d-setup-vs-result}),
+	the next step is to evaluate how the measured \emph{distance-to-origin} behaves over long runs
+	(\texttt{N=10000} samples) and how the effective update rate changes with different configured
+	target frequencies.
+	
+	\begin{tcolorbox}[title=Note (plot generation),
+		colback=accentlight!60!white,
+		sharp corners]
+		The plots shown in this subsection were generated from the recorded CSV logs by running
+		\texttt{web\_plot.py}. The script reads the files in
+		\texttt{data\_logger/sensor\_web/CSVs/} and writes the corresponding images into
+		\texttt{data\_logger/sensor\_web/CSVs/plots/}.
+	\end{tcolorbox}
+	
+	The following figures show the long-run distance logs for a tag placed at approximately \SI{2}{m}
+	from the origin, recorded for multiple configured target ranging rates. (The frequency saturation
+	overview plot is intentionally omitted here and discussed in the next subsection.)
+	
+	\begin{figure}[H]
+		\centering
+		
+		% ---------------- Row 1 (3 plots) ----------------
+		\begin{minipage}{0.32\linewidth}
+			\centering
+			\includegraphics[width=\linewidth]{data_logger/sensor_web/CSVs/plots/2m_10.0Hz.png}
+			
+			\vspace{0.25em}
+			{\footnotesize \texttt{2m\_10.0Hz.png}}
+		\end{minipage}
+		\hfill
+		\begin{minipage}{0.32\linewidth}
+			\centering
+			\includegraphics[width=\linewidth]{data_logger/sensor_web/CSVs/plots/2m_30.0Hz.png}
+			
+			\vspace{0.25em}
+			{\footnotesize \texttt{2m\_30.0Hz.png}}
+		\end{minipage}
+		\hfill
+		\begin{minipage}{0.32\linewidth}
+			\centering
+			\includegraphics[width=\linewidth]{data_logger/sensor_web/CSVs/plots/2m_60.0Hz.png}
+			
+			\vspace{0.25em}
+			{\footnotesize \texttt{2m\_60.0Hz.png}}
+		\end{minipage}
+		
+		\vspace{0.8em}
+		
+		% ---------------- Row 2 (3 plots) ----------------
+		\begin{minipage}{0.32\linewidth}
+			\centering
+			\includegraphics[width=\linewidth]{data_logger/sensor_web/CSVs/plots/2m_100.0Hz.png}
+			
+			\vspace{0.25em}
+			{\footnotesize \texttt{2m\_100.0Hz.png}}
+		\end{minipage}
+		\hfill
+		\begin{minipage}{0.32\linewidth}
+			\centering
+			\includegraphics[width=\linewidth]{data_logger/sensor_web/CSVs/plots/2m_200.0Hz.png}
+			
+			\vspace{0.25em}
+			{\footnotesize \texttt{2m\_200.0Hz.png}}
+		\end{minipage}
+		\hfill
+		\begin{minipage}{0.32\linewidth}
+			\centering
+			\includegraphics[width=\linewidth]{data_logger/sensor_web/CSVs/plots/2m_500.0Hz.png}
+			
+			\vspace{0.25em}
+			{\footnotesize \texttt{2m\_500.0Hz.png}}
+		\end{minipage}
+		
+		\vspace{0.8em}
+		
+		% ---------------- Row 3 (centered single plot) ----------------
+		\begin{minipage}{0.32\linewidth}
+			\centering
+			\includegraphics[width=\linewidth]{data_logger/sensor_web/CSVs/plots/2m_555.0Hz.png}
+			
+			\vspace{0.25em}
+			{\footnotesize \texttt{2m\_555.0Hz.png}}
+		\end{minipage}
+		
+		\caption{Long-run distance logs (\texttt{N=10000}) for the \SI{2}{m} test case at different configured target rates.}
+		\label{fig:2d-logs-grid}
+	\end{figure}
+	
+	
+	% ----------------------------------------------------
+	\subsection{Throughput saturation and accuracy summary (2 m, long-run logs)}
+	\label{subsec:2d-localization-accuracy-summary}
+	% ----------------------------------------------------
+	
+	To summarize the \SI{2}{m} long-run experiment (\texttt{N=10000}), the CSV logs were processed with
+	\texttt{analyze\_data.py} and the plots were generated with \texttt{web\_plot.py}. The saturation
+	behaviour (target vs.\ actually achieved update rate) is shown in Figure~\ref{fig:freq-saturation-2m}.
+	
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.5\linewidth]{data_logger/sensor_web/CSVs/plots/Frequency_Saturation_LogScale.png}
+		\caption{Throughput saturation for the \SI{2}{m} test: configured target frequency vs.\ measured effective frequency (log scale).}
+		\label{fig:freq-saturation-2m}
+	\end{figure}
+	
+	\medskip
+	\noindent
+	Table~\ref{tab:uwb-2m-longrun-summary} lists the computed statistics for each configured rate.
+	Here, the \emph{error} is defined as $\bar{d} - d_{\text{target}}$ (negative values indicate an underestimate).
+	
+	\begin{table}[H]
+		\centering
+		\scriptsize
+		\caption{Summary of update rate and distance statistics for the \SI{2}{m} long-run experiment (\texttt{N=10000}).}
+		\label{tab:uwb-2m-longrun-summary}
+		
+		% keep siunitx local to this table (no preamble change needed)
+		\sisetup{
+			table-number-alignment=center,
+			round-mode=places,
+			round-precision=2
+		}
+		
+		\setlength{\tabcolsep}{4pt}
+		\begin{tabular}{l
+				S[table-format=3.0]
+				S[table-format=3.2]
+				S[table-format=3.2]
+				S[table-format=3.2]
+				S[table-format=1.4]
+				S[table-format=1.4]
+				r}
+			\toprule
+			\textbf{File} &
+			{\textbf{Target [Hz]}} &
+			{\textbf{Actual [Hz]}} &
+			{\textbf{$\overline{\Delta t}$ [ms]}} &
+			{\textbf{Mean [m]}} &
+			{\textbf{Error [m]}} &
+			{\textbf{Std dev [m]}} &
+			\textbf{N} \\
+			\midrule
+			\texttt{2m\_10.0Hz.csv}  & 10.0  & 9.18   & 108.94 & 1.8702 & -0.1298 & 0.0397 & 10000 \\
+			\texttt{2m\_30.0Hz.csv}  & 30.0  & 23.26  & 42.99  & 1.9980 & -0.0020 & 0.1460 & 10000 \\
+			\texttt{2m\_60.0Hz.csv}  & 60.0  & 42.05  & 23.78  & 1.9298 & -0.0702 & 0.0480 & 10000 \\
+			\texttt{2m\_100.0Hz.csv} & 100.0 & 70.02  & 14.28  & 1.9581 & -0.0419 & 0.0896 & 10000 \\
+			\texttt{2m\_200.0Hz.csv} & 200.0 & 129.16 & 7.74   & 1.9337 & -0.0663 & 0.0230 & 10000 \\
+			\texttt{2m\_500.0Hz.csv} & 500.0 & 226.91 & 4.41   & 1.9493 & -0.0507 & 0.0363 & 10000 \\
+			\texttt{2m\_555.0Hz.csv} & 555.0 & 260.22 & 3.84   & 1.2791 & -0.7209 & 0.8066 & 10000 \\
+			\bottomrule
+		\end{tabular}
+	\end{table}
+	
+	\medskip
+	\noindent
+	\textbf{Conclusion.}
+	The system saturates at an effective maximum update rate of about \SI{260}{Hz} (at a target setting of \SI{555}{Hz}).
+	However, the \SI{555}{Hz} run shows extremely unstable distance behaviour (very large standard deviation and a strong
+	mean error), indicating that this operating point is not reliable. A practical compromise is to configure
+	\SI{500}{Hz}, which achieves about \SI{227}{Hz} in practice while keeping the distance estimates stable.
 	
 %	\subsection{Evaluation of accuracy, precision and effective update rate}
 %	\label{subsec:uwb-eval-metrics}
