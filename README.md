@@ -51,7 +51,7 @@ This project shows how to program the Challenger RP2040 UWB module with the Ardu
   - [x] 5.a) Setup / topology configuration  
   - [x] 5.b) Data transmission and functional testing  
 
-- [] 5.2 Build a sensor network consisting of 4 anchors and 2 tags (3D localisation)
+- [ ] 5.2 Build a sensor network consisting of 4 anchors and 2 tags (3D localisation)
   - [ ] 5.a) Setup / topology configuration  
   - [ ] 5.b) Data transmission and functional testing
 
