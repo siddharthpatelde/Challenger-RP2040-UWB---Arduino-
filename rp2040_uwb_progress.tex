@@ -251,7 +251,7 @@ It explains how to install the iLabs board package and select the correct board 
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.75\linewidth]{figures/board_port_selection}%
+	\includegraphics[width=0.5\linewidth]{figures/board_port_selection}%
 	\caption{Selecting the \texttt{iLabs Challenger 2040 UWB} board and USB serial port in the Arduino IDE.}
 	\label{fig:board-port-selection}
 \end{figure}
@@ -265,7 +265,7 @@ mount as a USB drive. On macOS this sometimes fails and the IDE reports:
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.7\linewidth]{figures/no_drive_error}%
+	\includegraphics[width=0.5\linewidth]{figures/no_drive_error}%
 	\caption{Typical Arduino upload error when the RP2040 UF2 drive is not detected.}
 	\label{fig:no-drive-error}
 \end{figure}
@@ -328,12 +328,11 @@ compilation fails with an error similar to:
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.7\linewidth]{figures/freertos_error}%
+	\includegraphics[width=0.45\linewidth]{figures/freertos_error}%
 	\caption{Compilation error when FreeRTOS is not enabled for the Challenger RP2040 UWB.}
 	\label{fig:freertos-error}
 \end{figure}
 
-\subsubsection{Enable FreeRTOS for the Challenger RP2040 UWB}
 
 \begin{tcolorbox}[title=Fix: enable FreeRTOS,colback=accentlight!60!white]
 	\begin{enumerate}
@@ -458,18 +457,12 @@ into more convenient, \emph{processed} data structures:
 		\label{fig:raw-data-demo-output}
 	\end{figure}
 	
-	
-	\newpage
-	
-		\subsection{Sketch: \texttt{rx\_raw\_data\_demo.ino}}
-	
 	The sketch \texttt{rx\_raw\_data\_demo.ino} configures the Challenger RP2040 UWB
 	as a receiver and prints the raw information from every incoming UWB frame
 	(timestamps, frame bytes, CIR, diagnostics, \dots) to the serial console.
 	
 		\begin{itemize}
 		\item \textbf{Fram grabber}: \texttt{rx\_raw\_data\_demo.ino}\footnote{\url{https://github.com/siddharthpatelde/Challenger-RP2040-UWB---Arduino-/blob/main/rx_raw_data_demo/rx_raw_data_demo.ino}}
-
 	\end{itemize}
 	
 %	\begin{tcolorbox}[colback=black!2,
@@ -503,9 +496,9 @@ into more convenient, \emph{processed} data structures:
 	time-of-flight and prints the resulting distance in meters on the serial
 	console (Figure~\ref{fig:ss-twr-distance}).
 	
-	\begin{figure}[h]
+	\begin{figure}[H]
 		\centering
-		\includegraphics[width=0.7\linewidth]{figures/ss_twr_distance_output}% <- replace with your screenshot filename
+		\includegraphics[width=0.4\linewidth]{figures/ss_twr_distance_output}% <- replace with your screenshot filename
 		\caption{Serial output of \texttt{ex\_06a\_ss\_twr\_initiator.ino} showing repeated distance estimates between the two nodes.}
 		\label{fig:ss-twr-distance}
 	\end{figure}
@@ -1263,7 +1256,7 @@ Using the clock offset compensation term $C_{\text{offset}}$, the propagation ti
 	\begin{figure}[H]
 		\centering
 		
-		\includegraphics[width=0.75\linewidth]{figures/ss_twr_timing.pdf}
+		\includegraphics[width=0.6\linewidth]{figures/ss_twr_timing.pdf}
 		\caption{SS-TWR timing overview: $T_{\text{round}}$, $T_{\text{reply}}$, and $T_{\text{prop}}$}
 		\label{fig:ss-twr-timing}
 	\end{figure}
@@ -1316,7 +1309,7 @@ which improves robustness against clock drift effects compared to SS-TWR.
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.95\linewidth]{figures/dw_4msg.pdf}
+	\includegraphics[width=0.9\linewidth]{figures/dw_4msg.pdf}
 	\caption{DS-TWR timing overview (4-message exchange).}
 	\label{fig:ds-twr-4msg}
 \end{figure}
@@ -1342,7 +1335,7 @@ In the same manual, it is mentioned that the \textbf{four-message exchange can b
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.95\linewidth]{figures/dw_3msg.pdf}
+	\includegraphics[width=0.8\linewidth]{figures/dw_3msg.pdf}
 	\caption{DS-TWR timing overview (3-message exchange).}
 	\label{fig:ds-twr-3msg}
 \end{figure}
@@ -1387,7 +1380,7 @@ $P(x,y)$.\footnote{IntechOpen, Section 3.2 ``Positioning method based on time di
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.75\linewidth]{figures/TdoA.pdf}
+	\includegraphics[width=0.6\linewidth]{figures/TdoA.pdf}
 	\caption{TDoA concept: one tag transmission received at multiple anchors, producing time-stamps $\tau_i$ and hyperbolic constraints for $P(x,y)$.}
 	\label{fig:tdoa-concept}
 \end{figure}
@@ -1459,7 +1452,7 @@ defines a circle equation.
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.7\linewidth]{figures/2d_geo.pdf}
+	\includegraphics[width=0.55\linewidth]{figures/2d_geo.pdf}
 	\caption{2D localization geometry with three anchors and one tag (trilateration principle).}
 	\label{fig:2d-geo}
 \end{figure}
@@ -1614,7 +1607,7 @@ similar in spirit to the calibration logging described earlier in
 different \emph{configured} ranging rates and store the resulting time series to CSV
 for later analysis.
 
-\begin{tcolorbox}[title=Note (project status: Sensor web --- data logging setup),
+\begin{tcolorbox}[title=Step 1: Configure each anchor (IDs + collision avoidance + target rate),
 	colback=accentlight!60!white,
 	sharp corners]
 	
@@ -1623,18 +1616,11 @@ for later analysis.
 		\item \url{https://github.com/siddharthpatelde/Challenger-RP2040-UWB---Arduino-/tree/main/data_logger/sensor_web}
 	\end{itemize}
 	
-	\textbf{Step 1: Configure each anchor (IDs + collision avoidance + target rate).}
 	Each anchor must be flashed with \emph{unique} IDs and a different start delay to
 	avoid collisions. The output rate is then iterated by changing \texttt{RNG\_DELAY\_MS}.
 	
 	\begin{minted}[fontsize=\small]{c++}
-		/* 1. UNIQUE SETTINGS PER ANCHOR */
-		#define ANCHOR_NAME "A3"     // Change to "A1", "A2", "A3"
-		#define ANCHOR_ADDR_L 0x41   // 'A'
-		#define ANCHOR_ADDR_H 0x33   // '3' (Change to 0x31 for A1,
-		//  0x32 for A2, 0x33 for A3)
-		
-		/* COLLISION AVOIDANCE:
+				/* COLLISION AVOIDANCE:
 		A1: 0ms, A2: 1ms, A3: 2ms. This prevents them from firing at the same time. */
 		#define START_DELAY_MS 0     // Example: A1=0, A2=1, A3=2
 		
@@ -1643,8 +1629,13 @@ for later analysis.
 		200Hz = 5ms, 500Hz = 2ms */
 		#define RNG_DELAY_MS 2
 	\end{minted}
-	
-	\textbf{Step 2: Log the data on the PC.}
+		
+\end{tcolorbox}
+
+
+\begin{tcolorbox}[title=Step 2: Log the data on the PC,
+	colback=accentlight!60!white,
+	sharp corners]
 	After setting a target rate on the anchors, run the Python logger
 	\texttt{web\_log.py} and write the received data into CSV files
 	(one CSV per configured rate).
@@ -1663,7 +1654,7 @@ for later analysis.
 	\end{minted}
 	
 	The experiment was executed at target rates:
-	\(\{10, 30, 60, 100, 200, 500, 555\}\,\text{Hz}\),
+	\(\{30, 60, 100, 200, 500, 555\}\,\text{Hz}\),
 	and the resulting CSV files were stored under the \texttt{CSVs/} folder in the
 	\texttt{sensor\_web} directory (see file naming in the repository).
 	
@@ -1696,99 +1687,67 @@ update rate and to inspect how the measured distances evolve over long runs
 	from the origin, recorded for multiple configured target ranging rates. (The frequency saturation
 	overview plot is intentionally omitted here and discussed in the next subsection.)
 	
-	\begin{figure}[H]
+\begin{figure}[H]
+	\centering
+	
+	% ---------------- Row 1 (3 plots) ----------------
+	\begin{minipage}{0.32\linewidth}
 		\centering
-		
-		% ---------------- Row 1 (3 plots) ----------------
-		\begin{minipage}{0.32\linewidth}
-			\centering
-			\includegraphics[width=\linewidth]{data_logger/sensor_web/CSVs/plots/2m_10.0Hz.png}
-			
-			\vspace{0.25em}
-			{\footnotesize \texttt{2m\_10.0Hz.png}}
-		\end{minipage}
-		\hfill
-		\begin{minipage}{0.32\linewidth}
-			\centering
-			\includegraphics[width=\linewidth]{data_logger/sensor_web/CSVs/plots/2m_30.0Hz.png}
-			
-			\vspace{0.25em}
-			{\footnotesize \texttt{2m\_30.0Hz.png}}
-		\end{minipage}
-		\hfill
-		\begin{minipage}{0.32\linewidth}
-			\centering
-			\includegraphics[width=\linewidth]{data_logger/sensor_web/CSVs/plots/2m_60.0Hz.png}
-			
-			\vspace{0.25em}
-			{\footnotesize \texttt{2m\_60.0Hz.png}}
-		\end{minipage}
-		
-		\vspace{0.8em}
-		
-		% ---------------- Row 2 (3 plots) ----------------
-		\begin{minipage}{0.32\linewidth}
-			\centering
-			\includegraphics[width=\linewidth]{data_logger/sensor_web/CSVs/plots/2m_100.0Hz.png}
-			
-			\vspace{0.25em}
-			{\footnotesize \texttt{2m\_100.0Hz.png}}
-		\end{minipage}
-		\hfill
-		\begin{minipage}{0.32\linewidth}
-			\centering
-			\includegraphics[width=\linewidth]{data_logger/sensor_web/CSVs/plots/2m_200.0Hz.png}
-			
-			\vspace{0.25em}
-			{\footnotesize \texttt{2m\_200.0Hz.png}}
-		\end{minipage}
-		\hfill
-		\begin{minipage}{0.32\linewidth}
-			\centering
-			\includegraphics[width=\linewidth]{data_logger/sensor_web/CSVs/plots/2m_500.0Hz.png}
-			
-			\vspace{0.25em}
-			{\footnotesize \texttt{2m\_500.0Hz.png}}
-		\end{minipage}
-		
-		\vspace{0.8em}
-		
-		% ---------------- Row 3 (centered single plot) ----------------
-		\begin{minipage}{0.32\linewidth}
-			\centering
-			\includegraphics[width=\linewidth]{data_logger/sensor_web/CSVs/plots/2m_555.0Hz.png}
-			
-			\vspace{0.25em}
-			{\footnotesize \texttt{2m\_555.0Hz.png}}
-		\end{minipage}
-		
-		\caption{Long-run distance logs (\texttt{N=10000}) for the \SI{2}{m} test case at different configured target rates.}
-		\label{fig:2d-logs-grid}
-	\end{figure}
-	
-	
-	% ----------------------------------------------------
-	\subsection{Throughput saturation and accuracy summary (2 m, long-run logs)}
-	\label{subsec:2d-localization-accuracy-summary}
-	% ----------------------------------------------------
-	
-	To summarize the \SI{2}{m} long-run experiment (\texttt{N=10000}), the CSV logs were processed with
-	\texttt{analyze\_data.py} and the plots were generated with \texttt{web\_plot.py}. The saturation
-	behaviour (target vs.\ actually achieved update rate) is shown in Figure~\ref{fig:freq-saturation-2m}.
-	
-	\begin{figure}[H]
+		\includegraphics[width=\linewidth]{data_logger/sensor_web/CSVs/plots/2m_30.0Hz.png}
+		\vspace{0.25em}
+		{\footnotesize \texttt{2m\_30.0Hz.png}}
+	\end{minipage}\hfill
+	\begin{minipage}{0.32\linewidth}
 		\centering
-		\includegraphics[width=0.5\linewidth]{data_logger/sensor_web/CSVs/plots/Frequency_Saturation_LogScale.png}
-		\caption{Throughput saturation for the \SI{2}{m} test: configured target frequency vs.\ measured effective frequency (log scale).}
-		\label{fig:freq-saturation-2m}
-	\end{figure}
+		\includegraphics[width=\linewidth]{data_logger/sensor_web/CSVs/plots/2m_60.0Hz.png}
+		\vspace{0.25em}
+		{\footnotesize \texttt{2m\_60.0Hz.png}}
+	\end{minipage}\hfill
+	\begin{minipage}{0.32\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{data_logger/sensor_web/CSVs/plots/2m_100.0Hz.png}
+		\vspace{0.25em}
+		{\footnotesize \texttt{2m\_100.0Hz.png}}
+	\end{minipage}
 	
-	\medskip
-	\noindent
-	Table~\ref{tab:uwb-2m-longrun-summary} lists the computed statistics for each configured rate.
-	Here, the \emph{error} is defined as $\bar{d} - d_{\text{target}}$ (negative values indicate an underestimate).
+	\vspace{0.8em}
 	
-	\begin{table}[H]
+	% ---------------- Row 2 (3 plots) ----------------
+	\begin{minipage}{0.32\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{data_logger/sensor_web/CSVs/plots/2m_200.0Hz.png}
+		\vspace{0.25em}
+		{\footnotesize \texttt{2m\_200.0Hz.png}}
+	\end{minipage}\hfill
+	\begin{minipage}{0.32\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{data_logger/sensor_web/CSVs/plots/2m_500.0Hz.png}
+		\vspace{0.25em}
+		{\footnotesize \texttt{2m\_500.0Hz.png}}
+	\end{minipage}\hfill
+	\begin{minipage}{0.32\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{data_logger/sensor_web/CSVs/plots/2m_555.0Hz.png}
+		\vspace{0.25em}
+		{\footnotesize \texttt{2m\_555.0Hz.png}}
+	\end{minipage}
+	
+	\vspace{0.8em}
+		
+	\caption{Long-run distance logs (\texttt{N=10000}) for the \SI{2}{m} test case at different configured target rates.}
+	\label{fig:2d-logs-grid}
+\end{figure}
+
+	
+	As described in section \ref{subsec:uwb-eval-metrics} i have again calculated followings and represnted in tha table \ref{tab:uwb-2m-longrun-summary} alsong with other iinformation.
+	
+	\begin{itemize}
+		\item the \textbf{effective measurement frequency} $f_{\text{meas}}$,
+		\item the \textbf{accuracy} of the distance estimate (mean error), and
+		\item the \textbf{precision} (spread of the measurements).
+	\end{itemize}
+	
+		\begin{table}[H]
 		\centering
 		\scriptsize
 		\caption{Summary of update rate and distance statistics for the \SI{2}{m} long-run experiment (\texttt{N=10000}).}
@@ -1820,7 +1779,6 @@ update rate and to inspect how the measured distances evolve over long runs
 			{\textbf{Std dev [m]}} &
 			\textbf{N} \\
 			\midrule
-			\texttt{2m\_10.0Hz.csv}  & 10.0  & 9.18   & 108.94 & 1.8702 & -0.1298 & 0.0397 & 10000 \\
 			\texttt{2m\_30.0Hz.csv}  & 30.0  & 23.26  & 42.99  & 1.9980 & -0.0020 & 0.1460 & 10000 \\
 			\texttt{2m\_60.0Hz.csv}  & 60.0  & 42.05  & 23.78  & 1.9298 & -0.0702 & 0.0480 & 10000 \\
 			\texttt{2m\_100.0Hz.csv} & 100.0 & 70.02  & 14.28  & 1.9581 & -0.0419 & 0.0896 & 10000 \\
@@ -1831,13 +1789,195 @@ update rate and to inspect how the measured distances evolve over long runs
 		\end{tabular}
 	\end{table}
 	
-	\medskip
-	\noindent
-	\textbf{Conclusion.}
-	The system saturates at an effective maximum update rate of about \SI{260}{Hz} (at a target setting of \SI{555}{Hz}).
-	However, the \SI{555}{Hz} run shows extremely unstable distance behaviour (very large standard deviation and a strong
-	mean error), indicating that this operating point is not reliable. A practical compromise is to configure
-	\SI{500}{Hz}, which achieves about \SI{227}{Hz} in practice while keeping the distance estimates stable.
+Next we will see the final conclusion section.
+
+\newpage
+% ====================================================
+\section{Conclusion and Key Findings}
+\label{sec:conclusion}
+% ====================================================
+
+This project started with a high-level overview of UWB ranging methods
+(Figure~\ref{fig:uwb-ranging-classification} in Section~\ref{sec:uwb-ranging-techniques}).
+In practice, several approaches exist to estimate distances, however during the experiments
+only one method worked reliably and seamlessly in my setup: \textbf{SS-TWR (Single-Sided Two-Way Ranging)}
+with \textbf{clock offset compensation}, as provided in the iLabs reference examples.
+According to the manufacturer documentation, using the clock offset ratio for error compensation
+can provide results comparable to more complex TWR variants.
+
+After validating SS-TWR in a one-anchor / one-tag setup, the measured data was evaluated in
+Section~\ref{subsec:uwb-eval-metrics}. Based on Table~\ref{tab:uwb-summary} and the processed plots
+in Subsection~\ref{subsec:python-processing}, the system behavior becomes clear:
+with increasing \textbf{target sampling rate}, the \textbf{effective update rate} saturates,
+and both \textbf{accuracy} and \textbf{precision} can degrade.
+
+To summarize these effects more intuitively, spider charts were created. They visualize how
+\textbf{stability (target vs.\ actual rate)}, \textbf{accuracy}(mean) and \textbf{precision}(standerd dev.) change
+across different configured target frequencies and distances.
+
+\begin{figure}[H]
+	\centering
+	
+	\begin{minipage}{0.32\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{data_logger/plots/Spider_Chart_1m.png}
+		\vspace{0.2em}
+		{\small \textbf{(a)} 1\,m}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{0.32\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{data_logger/plots/Spider_Chart_2m.png}
+		\vspace{0.2em}
+		{\small \textbf{(b)} 2\,m}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{0.32\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{data_logger/plots/Spider_Chart_4m.png}
+		\vspace{0.2em}
+		{\small \textbf{(c)} 4\,m}
+	\end{minipage}
+	
+	\caption{Spider chart summary for short-to-mid distances (1\,m, 2\,m, 4\,m): increasing target frequency generally reduces accuracy and precision, while the achievable update rate saturates.}
+	\label{fig:spider-short-mid}
+\end{figure}
+
+For distances from \textbf{1\,m to 4\,m}, the behavior is overall promising and relatively consistent:
+the system remains stable, and the trade-off is clear --- as the configured frequency increases,
+\textbf{accuracy} and \textbf{precision} tend to decrease.
+
+However, the situation changes when analyzing \textbf{8\,m and 12\,m}.
+
+\begin{figure}[H]
+	\centering
+	
+	\begin{minipage}{0.32\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{data_logger/plots/Spider_Chart_8m.png}
+		\vspace{0.2em}
+		{\small \textbf{(a)} 8\,m}
+	\end{minipage}
+	\hspace{0.0cm}
+	\begin{minipage}{0.32\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{data_logger/plots/Spider_Chart_12m.png}
+		\vspace{0.2em}
+		{\small \textbf{(b)} 12\,m}
+	\end{minipage}
+	
+	\caption{Spider chart summary for larger distances (8\,m, 12\,m): accuracy drops beyond 8\,m, and around 12\,m both accuracy/precision degrade further while the effective update rate also decreases.}
+	\label{fig:spider-long}
+\end{figure}
+
+The charts indicate that beyond roughly \textbf{8\,m}, the overall measurement quality drops noticeably.
+At \textbf{12\,m}, not only accuracy and precision degrade, but the \textbf{effective update rate} is also reduced.
+Therefore, for a robust robotics-oriented setup, it is preferable to operate the system at
+\textbf{moderate distances (up to $\sim$8\,m)} to achieve a good balance of accuracy, precision,
+and output rate. For distances around \textbf{12\,m}, the system should be operated at \textbf{lower frequencies}
+and the reduced accuracy/precision must be accepted and accounted for.
+
+% ----------------------------------------------------
+\subsection{XY stability vs.\ ranging delay (2D trilateration long-run)}
+\label{subsec:uwb-2d-xy-stability}
+% ----------------------------------------------------
+
+Using the 2D trilateration setup from \ref{subsec:2d-localization-geometry}, it becomes clear that
+all three anchor--tag distances must be updated as fast as possible, while keeping the
+time offset between anchor measurements as small as possible. In practice, this requires
+a careful scheduling of the anchors to avoid collisions and to minimize inter-anchor delay.
+In our implementation, the smallest practical spacing was on the order of \SI{1}{ms} between anchors,
+and with \mintinline{c++}{#define RNG_DELAY_MS 2} this corresponds to a \emph{theoretical} update rate of
+\SI{500}{Hz}. However, the long-run evaluation (Table~\ref{tab:uwb-2m-longrun-summary}) shows that the
+\emph{actual} sustained rate in real operation is around \SI{225}{Hz}. When pushing further (e.g.\ toward
+\SI{550}{Hz} theoretical / \SI{260}{Hz} measured), the estimated $(x,y)$ position begins to show strong
+deviation and instability.
+
+Figure~\ref{fig:uwb-xy-stability-2m-grid} shows the XY position stability plots for target rates
+from \SI{30}{Hz} up to \SI{500}{Hz}. The distributions remain relatively compact and consistent over this range.
+In contrast, Figure~~\ref{fig:uwb-xy-stability-2m-grid} (f) illustrates the high-deviation case when exceeding the
+\SI{500}{Hz} setting.
+
+\begin{figure}[H]
+	\centering
+	
+	% -------- Row 1 (3 plots) --------
+	\begin{minipage}{0.25\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{data_logger/sensor_web/CSVs/plots/2m_30.0Hz_XY_Stability.png}
+		\vspace{0.2em}
+		{\small \textbf{(a)} \SI{30}{Hz}}
+	\end{minipage}\hfill
+	\begin{minipage}{0.25\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{data_logger/sensor_web/CSVs/plots/2m_60.0Hz_XY_Stability.png}
+		\vspace{0.2em}
+		{\small \textbf{(b)} \SI{60}{Hz}}
+	\end{minipage}\hfill
+	\begin{minipage}{0.25\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{data_logger/sensor_web/CSVs/plots/2m_100.0Hz_XY_Stability.png}
+		\vspace{0.2em}
+		{\small \textbf{(c)} \SI{100}{Hz}}
+	\end{minipage}
+	
+	\vspace{0.6em}
+	
+	% -------- Row 2 (3 plots) --------
+	\begin{minipage}{0.25\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{data_logger/sensor_web/CSVs/plots/2m_200.0Hz_XY_Stability.png}
+		\vspace{0.2em}
+		{\small \textbf{(d)} \SI{200}{Hz}}
+	\end{minipage}\hfill
+	\begin{minipage}{0.25\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{data_logger/sensor_web/CSVs/plots/2m_500.0Hz_XY_Stability.png}
+		\vspace{0.2em}
+		{\small \textbf{(e)} \SI{500}{Hz}}
+	\end{minipage}\hfill
+	\begin{minipage}{0.25\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{data_logger/sensor_web/CSVs/plots/2m_555.0Hz_XY_Stability.png}
+		\vspace{0.2em}
+		{\small \textbf{(f)} \SI{555}{Hz}}
+	\end{minipage}
+	
+	\caption{XY position stability for the \SI{2}{m} test at different target rates.}
+	\label{fig:uwb-xy-stability-2m-grid}
+\end{figure}
+
+
+
+From these observations, the main practical conclusion is that the \textbf{sweet spot} for this
+\textbf{3-anchor + 1-tag} trilateration setup is achieved when the ranging delay is around
+\SI{2}{ms} (i.e.\ \SI{500}{Hz} theoretical, \SI{225}{Hz} actual) and when operating distances are kept at
+approximately \SI{8}{m} or below. Beyond this point (either by pushing rate higher or by increasing
+distance toward \SI{12}{m}), the system must accept reduced accuracy/precision and/or operate at a
+lower effective update rate.
+
+
+
+
+	
+	
+	
+
+%	i would like to write now final conclusion section...
+%	
+%	In this section i would first like to mention some of the facts that i found out from the experiments done in before sections...
+%	
+%	starting from 1.  this figures 	\label{fig:uwb-ranging-classification} from section \label{sec:uwb-ranging-techniques}
+%	i came up with saveral mathods of domuping distnaces.... apon experiments i found out that only one mathod seem to be working fine seemlesy which is SS-TWR (single sided) with clock offset compensation the example was given my the menufecture from ILabs. and since it is clearly mention in ... [ \footnote{DW3000 User Manual (Decawave/Qorvo), section ``Single-sided two-way ranging'':
+%		\url{https://www.decawave.com/wp-content/uploads/2021/05/DW3000-User-Manual-1.pdf}} }
+%		
+%		It is crelay stated that with clock offset compensation it as as good as any other TWR technieqs...
+%		
+%		later perofrming accurasy test of  frequancy of the data from section.. \label{subsec:uwb-eval-metrics}
+%		and from the table 	\label{tab:uwb-summary} and comparing the plots in subsection 	\label{subsec:python-processing} we get the information on repeatebility... maximum frequncy of the sensor output when "SS twr - with clockoffset" one Teg One Anchor system 
+%		
+%		which is shown as below...
+%		from the data it is clrear that sensor is operational perfectly from 1m distnace to 12m distnace 
 	
 %	\subsection{Evaluation of accuracy, precision and effective update rate}
 %	\label{subsec:uwb-eval-metrics}
