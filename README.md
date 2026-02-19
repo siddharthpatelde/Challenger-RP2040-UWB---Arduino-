@@ -47,9 +47,17 @@ This project shows how to program the Challenger RP2040 UWB module with the Ardu
   - [x] Send Pico data to the host in (near) real-time  
   - [x] Insert the data into a database (in-memory or SQLite)  
 
-- [ ] 5. Build a sensor network consisting of 4 anchors and 2 tags  
+- [x] ~~5.1 Build a sensor network consisting of 3 anchors and 1 tags (2D localisation)~~
+  - [x] 5.a) Setup / topology configuration  
+  - [x] 5.b) Data transmission and functional testing  
+
+- [] 5.2 Build a sensor network consisting of 4 anchors and 2 tags (3D localisation)
   - [ ] 5.a) Setup / topology configuration  
-  - [ ] 5.b) Data transmission and functional testing  
+  - [ ] 5.b) Data transmission and functional testing
+
+- [x] ~~6.1 Perform 2D localization on the PC with real-time data~~
+  - simple: Pythagoras / multilateration
+  - Goal: output and update x, y coordinates in real-time  
 
 - [ ] 6. Perform 3D localization on the PC with real-time data  
   - Goal: output and update x, y, z coordinates in real-time  
@@ -60,6 +68,6 @@ This project shows how to program the Challenger RP2040 UWB module with the Ardu
 
 - [ ] 7. Improve position accuracy using a Kalman filter  
 
-- [ ] 8. Connect the system to the PTZ camera  
+- [ ] 8. Connect the system to the PTZ camera
   - [ ] Use position data for camera control  
   - [ ] Test tracking and pointing accuracy
